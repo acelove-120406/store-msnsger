@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="店舗管理">
+<title>店舗税務管理</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#f4f3ef;--surface:#fff;--surface2:#f0efe9;
+  --border:rgba(0,0,0,.09);--border2:rgba(0,0,0,.16);
+  --text:#1a1916;--text2:#6b6a64;--text3:#9b9a94;
+  --green:#1a7a50;--green-bg:#e8f5ee;
+  --red:#b03020;--red-bg:#fdf0ee;
+  --amber:#8a6200;--amber-bg:#fdf6e3;
+  --blue:#1a4f8a;--blue-bg:#eaf1fb;
+  --purple:#4a3a9a;--purple-bg:#f0eeff;
+  --r:12px;--rsm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--bg);font-family:-apple-system,'Hiragino Sans','Noto Sans JP',sans-serif;color:var(--text);font-size:15px}
+input,select,textarea,button{font-family:inherit;font-size:15px}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+
+#app{min-height:100vh;padding-bottom:48px}
+
+/* Topbar */
+.topbar{background:var(--surface);border-bottom:.5px solid var(--border);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:17px;font-weight:700}
+.topbar-sub{font-size:12px;color:var(--text2);margin-top:1px}
+
+/* Tabs */
+.tabs{display:flex;background:var(--surface);border-bottom:.5px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:11px 16px;font-size:13px;font-weight:500;color:var(--text2);border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-.5px;white-space:nowrap;cursor:pointer}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+
+/* Card */
+.card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:12px;border:.5px solid var(--border)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:var(--rsm);font-size:14px;font-weight:600;cursor:pointer;border:.5px solid var(--border2);background:var(--surface);color:var(--text)}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
+.btn-send{background:#0a5c45;color:#e1f5ee;border-color:#0a5c45}
+.btn-sm{font-size:12px;padding:7px 14px}
+.btn-block{width:100%;margin-top:8px}
+.btn-add-row{width:100%;text-align:left;padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;border:none;background:none;display:flex;align-items:center;gap:6px;border-top:.5px solid var(--border)}
+.btn-add-row:active{background:var(--surface2)}
+.btn-del{border:none;background:none;cursor:pointer;color:var(--text3);padding:4px 6px;font-size:16px}
+.btn-del:active{color:var(--red)}
+.btn-icon{border:none;background:none;cursor:pointer;color:var(--text2);padding:4px 8px;border-radius:var(--rsm)}
+
+/* Field */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:600;color:var(--text2)}
+.field input,.field select,.field textarea{padding:11px 13px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);color:var(--text);outline:none;width:100%}
+.field input:focus,.field select:focus{border-color:var(--text)}
+
+/* Section block (input form) */
+.sec-block{border:.5px solid var(--border);border-radius:var(--rsm);margin-bottom:10px;overflow:hidden;background:var(--surface)}
+.sec-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2)}
+.sec-head-left{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.sec-sub{font-size:13px;font-weight:700}
+.detail-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:.5px solid var(--border)}
+.dr-name{flex:1.5}
+.dr-name input{width:100%;border:none;background:transparent;outline:none;font-size:14px;color:var(--text)}
+.dr-name input::placeholder{color:var(--text3)}
+.dr-amt{display:flex;align-items:center;gap:4px;flex:1}
+.dr-amt input{width:100%;text-align:right;font-size:14px;border:none;background:transparent;outline:none}
+.dr-unit{font-size:12px;color:var(--text2);white-space:nowrap}
+
+/* Sum rows */
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:.5px solid var(--border)}
+.sum-row.total{border-top:1.5px solid var(--text);margin-top:4px;padding-top:13px}
+
+/* Badge */
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.bg-green{background:var(--green-bg);color:var(--green)}
+.bg-red{background:var(--red-bg);color:var(--red)}
+.bg-amber{background:var(--amber-bg);color:var(--amber)}
+.bg-blue{background:var(--blue-bg);color:var(--blue)}
+.bg-gray{background:var(--surface2);color:var(--text2)}
+
+/* Banner */
+.banner{border-radius:var(--rsm);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px}
+
+/* Login */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.login-box{background:var(--surface);border-radius:var(--r);padding:28px 24px;width:100%;max-width:360px;border:.5px solid var(--border)}
+.login-err{font-size:13px;color:var(--red);background:var(--red-bg);padding:10px 14px;border-radius:var(--rsm);margin-bottom:14px;display:none}
+
+/* Role select */
+.role-card{background:var(--surface);border-radius:var(--r);padding:20px;border:.5px solid var(--border);display:flex;align-items:center;gap:16px;cursor:pointer;margin-bottom:12px;width:100%;text-align:left}
+.role-card:active{background:var(--surface2)}
+
+/* Store select */
+.store-card{background:var(--surface);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:.5px solid var(--border);width:100%}
+.store-card:active{background:var(--surface2)}
+
+/* Dot */
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.dot-g{background:#1D9E75}.dot-r{background:#E24B4A}.dot-gray{background:#B4B2A9}
+.notify-badge{background:#E24B4A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:inline-flex;align-items:center;justify-content:center;margin-left:5px;font-weight:700}
+
+/* AI panel */
+.ai-panel{background:var(--purple-bg);border:.5px solid #c5bcf0;border-radius:var(--r);padding:16px;margin-bottom:12px}
+.drop-zone{border:2px dashed #a99ee0;border-radius:var(--rsm);padding:28px 16px;text-align:center;cursor:pointer;color:var(--purple)}
+.drop-zone i{font-size:40px;display:block;margin-bottom:10px;opacity:.7}
+.ai-result{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rsm);padding:14px;margin-top:12px;display:none}
+.ai-result.show{display:block}
+.ai-result-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border);gap:10px}
+.ai-result-row:last-of-type{border-bottom:none}
+.thinking{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--purple);padding:12px 0}
+.spin{width:16px;height:16px;border:2px solid rgba(74,58,154,.2);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite}
+.spin-sm{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* HQ store card */
+.hq-store-card{background:var(--surface);border-radius:var(--r);margin-bottom:14px;border:.5px solid var(--border);overflow:hidden}
+.hq-store-card-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.hq-store-card-body{padding:0 16px 16px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.kpi{border-radius:var(--rsm);padding:11px 13px}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.05em;margin-bottom:4px;text-transform:uppercase}
+.kpi-val{font-size:19px;font-weight:700}
+.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cost-box{border-radius:var(--rsm);padding:10px 12px}
+.cost-label{font-size:10px;font-weight:700;margin-bottom:3px}
+.cost-val{font-size:16px;font-weight:700}
+.cost-sub{font-size:10px;margin-top:3px;opacity:.8}
+
+/* Detail table in HQ */
+.detail-sec{margin-bottom:10px}
+.detail-sec-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:var(--rsm);margin-bottom:2px}
+.detail-sec-head-label{font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px}
+.detail-item{display:flex;justify-content:space-between;padding:7px 12px 7px 26px;border-bottom:.5px solid var(--border);font-size:13px}
+.detail-item:last-child{border-bottom:none}
+
+/* Info box */
+.info-box{background:var(--surface2);border-radius:var(--rsm);padding:12px 14px;font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:flex-start;margin-bottom:12px}
+
+/* Store edit row */
+.store-edit-row{padding:14px 0;border-bottom:.5px solid var(--border)}
+.store-edit-row:last-child{border-bottom:none}
+
+/* Toast */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:11px 22px;border-radius:24px;font-size:14px;z-index:9999;display:none;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+const HQ_PW = 'Nari1227';
+const SK = 'hq_v6_';
+
+const DEFAULT_STORES = [
+  {id:'s1',name:'本店',manager:'田中 一郎'},
+  {id:'s2',name:'北口店',manager:'鈴木 花子'},
+  {id:'s3',name:'南店',manager:'佐藤 次郎'},
+];
+
+let state = {role:null, storeId:null, storeName:null};
+let formData = {};
+let receiptResult = null;
+
+// ── Storage ──
+function lsSet(k,v){try{localStorage.setItem(SK+k,JSON.stringify(v));}catch(e){}}
+function lsGet(k){try{const r=localStorage.getItem(SK+k);return r?JSON.parse(r):null;}catch(e){return null;}}
+function getStores(){return lsGet('stores')||DEFAULT_STORES;}
+function saveStores(a){lsSet('stores',a);}
+function saveRec(r){lsSet('rec_'+r.storeId+'_'+r.month,r);}
+function loadRec(sid,mo){return lsGet('rec_'+sid+'_'+mo);}
+function loadAllForMonth(mo){return getStores().map(s=>loadRec(s.id,mo)).filter(Boolean);}
+function loadStoreHistory(sid){
+  return Object.keys(localStorage)
+    .filter(k=>k.startsWith(SK+'rec_'+sid+'_'))
+    .map(k=>{try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}})
+    .filter(Boolean).sort((a,b)=>b.month.localeCompare(a.month));
+}
+
+// ── Helpers ──
+function uid(){return'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function fmt(n){return'¥'+Math.round(n||0).toLocaleString('ja-JP');}
+function ym(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function sumItems(arr){return(arr||[]).reduce((s,i)=>s+(parseFloat(i.amount)||0),0);}
+function incomeOf(r){
+  if(!r)return 0;
+  if(r.storeId==='s1'){
+    const ins=['ins_shakai','ins_kokuho','ins_kaigo','ins_jibai','ins_rousai','ins_seishin'];
+    const shisetsu=['shisetsu_green','shisetsu_togen','shisetsu_fukugi','shisetsu_zaitaku'];
+    return (parseFloat(r.madoguchi)||0)
+      +ins.reduce((s,k)=>s+(parseFloat(r[k])||0),0)
+      +shisetsu.reduce((s,k)=>s+(parseFloat(r[k])||0),0)
+      +(parseFloat(r.yachin)||0)+(parseFloat(r.card)||0)
+      +sumItems(r.otherIncome);
+  } else {
+    // 北口・南店
+    return sumItems(r.sales)+sumItems(r.gaishutsu)+sumItems(r.detergent)+sumItems(r.otherIncome);
+  }
+}
+function fixedOf(r){
+  if(!r)return 0;
+  if(r.storeId==='s1'){
+    const utils=['water1f','water2f','elec1f1','elec1f2','elec2f','gas1f','gas2f'];
+    return sv1(r,'labor_yamasiro')+sv1(r,'labor_murakami')+sv1(r,'labor_bonus')
+      +(sv1(r,'rent_daito')||78170)+(sv1(r,'rent_meiko')||80110)
+      +utils.reduce((s,k)=>s+sv1(r,k),0)
+      +(sv1(r,'daiichi')||24669)+sv1(r,'yakuzaishi');
+  } else {
+    return sumItems(r.rent)+sumItems(r.utilities)+sumItems(r.otherFixed)
+      +sv1(r,'water')+sv1(r,'elec')+sv1(r,'gas')+sumItems(r.machLease);
+  }
+}
+function miscOf(r){
+  if(!r||r.storeId!=='s1')return 0;
+  const DEF={kakehashi:47278,ricoh:117480,docomo:4433,ryugin:2200,orico:133320,ryuanzen:12100,nisseiCar:6450,nisseiYama:18377,nisseiLife:12460,nhk:1930};
+  return sv1(r,'hikari')
+    +(sv1(r,'kakehashi')||DEF.kakehashi)+(sv1(r,'ricoh')||DEF.ricoh)
+    +sv1(r,'fujifilm')+sv1(r,'sharp')
+    +(sv1(r,'docomo')||DEF.docomo)+(sv1(r,'ryugin')||DEF.ryugin)
+    +(sv1(r,'orico')||DEF.orico)+(sv1(r,'ryuanzen')||DEF.ryuanzen)
+    +sv1(r,'ryudc')
+    +(sv1(r,'nisseiCar')||DEF.nisseiCar)+(sv1(r,'nisseiYama')||DEF.nisseiYama)
+    +(sv1(r,'nisseiLife')||DEF.nisseiLife)+(sv1(r,'nhk')||DEF.nhk);
+}
+function varOf(r){
+  if(!r)return 0;
+  return sumItems(r.kaitori)+sumItems(r.otherVar);
+}
+function publicOf(r){
+  if(!r)return 0;
+  if(r.storeId==='s1'){
+    return sv1(r,'kouseiNenkin')+sv1(r,'tax_shakai')+sv1(r,'tax_hojin')+sv1(r,'tax_shikenmin')+sv1(r,'tax_kotei')+sv1(r,'kouko_repay')+sv1(r,'tax_other');
+  } else if(r.storeId==='s2'){
+    return sv1(r,'k_kouseiNenkin')+sv1(r,'k_tax_shakai')+sv1(r,'k_tax_hojin')+sv1(r,'k_tax_shikenmin')+sv1(r,'k_tax_kotei')+sv1(r,'k_kouko_repay')+sv1(r,'k_tax_other');
+  } else {
+    return sv1(r,'m_kouseiNenkin')+sv1(r,'m_tax_shakai')+sv1(r,'m_tax_hojin')+sv1(r,'m_tax_shikenmin')+sv1(r,'m_tax_kotei')+sv1(r,'m_kouko_repay')+sv1(r,'m_tax_other');
+  }
+}
+function costsOf(r){return fixedOf(r)+miscOf(r)+varOf(r)+publicOf(r);}
+function sv1(r,k){return parseFloat(r?.[k])||0;}
+function el(id){return document.getElementById(id);}
+function toast(msg){const t=el('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2400);}
+
+// ══════════ スタッフ入力用（収入・仕入れのみ）══════════
+const SECTIONS_honten_staff = [
+  {key:'madoguchi',label:'窓口収入',icon:'ti-cash',color:'#1a4f8a',ph:'金額を入力',single:true},
+  {key:'ins_shakai',label:'社会保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_kokuho',label:'国民健康保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_kaigo',label:'介護保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_jibai',label:'自賠責保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_rousai',label:'労災',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_seishin',label:'精神保健',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'shisetsu_green',label:'施設｜グリーンハウス山宗',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_togen',label:'施設｜桃源の郷',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_fukugi',label:'施設｜ふくぎの里',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_zaitaku',label:'在宅訪問',icon:'ti-home-heart',color:'#0f6e56',single:true},
+  {key:'yachin',label:'家賃収入',icon:'ti-home-dollar',color:'#1a4f8a',single:true},
+  {key:'card',label:'カード収入',icon:'ti-credit-card',color:'#1a4f8a',single:true},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'tax',label:'消費税（預り）',icon:'ti-percentage',color:'#6b6a64',single:true},
+  {key:'rent_daito',label:'大東建託',icon:'ti-home',color:'#b03020',single:true,defaultVal:78170},
+  {key:'rent_meiko',label:'明光不動産',icon:'ti-home',color:'#b03020',single:true,defaultVal:80110},
+  {key:'water1f',label:'水道 1F',icon:'ti-droplet',color:'#b03020',single:true},
+  {key:'water2f',label:'水道 2F',icon:'ti-droplet',color:'#b03020',single:true},
+  {key:'elec1f1',label:'電気 1F-1',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'elec1f2',label:'電気 1F-2',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'elec2f',label:'電気 2F',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'gas1f',label:'ガス 1F',icon:'ti-flame',color:'#b03020',single:true},
+  {key:'gas2f',label:'ガス 2F',icon:'ti-flame',color:'#b03020',single:true},
+  {key:'daiichi',label:'第一生命',icon:'ti-shield',color:'#b03020',single:true,defaultVal:24669},
+  {key:'yakuzaishi',label:'沖）薬剤師会',icon:'ti-medical-cross',color:'#b03020',single:true},
+  {key:'kouseiNenkin',label:'厚生年金',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_shakai',label:'社会保険料',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_hojin',label:'法人税',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_shikenmin',label:'市県民税',icon:'ti-building-community',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_kotei',label:'固定資産税',icon:'ti-home-2',color:'#7b1fa2',single:true,public:true},
+  {key:'kouko_repay',label:'公庫借入返済',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_other',label:'その他公的支払い',icon:'ti-receipt-tax',color:'#7b1fa2',single:true,public:true},
+  {key:'hikari',label:'光通信工業',icon:'ti-wifi',color:'#5a4200',single:true},
+  {key:'kakehashi',label:'カケハシJCB',icon:'ti-credit-card',color:'#5a4200',single:true,defaultVal:47278},
+  {key:'ricoh',label:'リコーリース',icon:'ti-printer',color:'#5a4200',single:true,defaultVal:117480},
+  {key:'fujifilm',label:'富士フィルム',icon:'ti-camera',color:'#5a4200',single:true},
+  {key:'sharp',label:'シャープファイナンス',icon:'ti-device-laptop',color:'#5a4200',single:true},
+  {key:'docomo',label:'ドコモビジネス',icon:'ti-device-mobile',color:'#5a4200',single:true,defaultVal:4433},
+  {key:'ryugin',label:'琉銀BIZネット',icon:'ti-building-bank',color:'#5a4200',single:true,defaultVal:2200},
+  {key:'orico',label:'オリコ',icon:'ti-credit-card',color:'#5a4200',single:true,defaultVal:133320},
+  {key:'ryuanzen',label:'琉球保安',icon:'ti-shield',color:'#5a4200',single:true,defaultVal:12100},
+  {key:'ryudc',label:'琉球DC',icon:'ti-server',color:'#5a4200',single:true},
+  {key:'nisseiCar',label:'車ニッセイ保険',icon:'ti-car',color:'#5a4200',single:true,defaultVal:6450},
+  {key:'nisseiYama',label:'ニッセイ生命（山城）',icon:'ti-shield-check',color:'#5a4200',single:true,defaultVal:18377},
+  {key:'nisseiLife',label:'ニッセイ生命保険',icon:'ti-shield-check',color:'#5a4200',single:true,defaultVal:12460},
+  {key:'nhk',label:'NHK受信料',icon:'ti-antenna',color:'#5a4200',single:true,defaultVal:1930},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品、広告費'},
+];
+const CATS_honten_staff = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['madoguchi','ins_shakai','ins_kokuho','ins_kaigo','ins_jibai','ins_rousai','ins_seishin','yachin','card','otherIncome','tax']},
+  {label:'施設収入',icon:'ti-building-community',color:'#0f6e56',keys:['shisetsu_green','shisetsu_togen','shisetsu_fukugi','shisetsu_zaitaku']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['rent_daito','rent_meiko','water1f','water2f','elec1f1','elec1f2','elec2f','gas1f','gas2f','daiichi','yakuzaishi']},
+  {label:'公的支払い（税金・社会保険）',icon:'ti-building-bank',color:'#7b1fa2',keys:['kouseiNenkin','tax_shakai','tax_hojin','tax_shikenmin','tax_kotei','kouko_repay','tax_other'],public:true},
+  {label:'諸経費（リース・通信・保険）',icon:'ti-receipt',color:'#5a4200',keys:['hikari','kakehashi','ricoh','fujifilm','sharp','docomo','ryugin','orico','ryuanzen','ryudc','nisseiCar','nisseiYama','nisseiLife','nhk']},
+  {label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',keys:['otherVar']},
+];
+
+const SECTIONS_kitag_staff = [
+  {key:'sales',label:'売上収入',icon:'ti-cash',color:'#1a4f8a',ph:'例：リサイクル売上'},
+  {key:'gaishutsu',label:'外出収入',icon:'ti-truck-delivery',color:'#1a4f8a',ph:'例：配達・出張売上'},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'rent',label:'家賃・賃料',icon:'ti-home',color:'#b03020',ph:'例：店舗家賃'},
+  {key:'utilities',label:'水道光熱費',icon:'ti-bolt',color:'#b03020',ph:'例：電気代'},
+  {key:'otherFixed',label:'その他固定費',icon:'ti-building',color:'#b03020',ph:'例：通信費、保険料'},
+  {key:'kaitori',label:'買取・仕入れ',icon:'ti-shopping-bag',color:'#8a6200',ph:'例：商品買取'},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品'},
+  {key:'k_kouseiNenkin',label:'厚生年金',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_shakai',label:'社会保険料',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_hojin',label:'法人税',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_shikenmin',label:'市県民税',icon:'ti-building-community',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_kotei',label:'固定資産税',icon:'ti-home-2',color:'#7b1fa2',single:true,public:true},
+  {key:'k_kouko_repay',label:'公庫借入返済',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_other',label:'その他公的支払い',icon:'ti-receipt-tax',color:'#7b1fa2',single:true,public:true},
+];
+const CATS_kitag_staff = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['sales','gaishutsu','otherIncome']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['rent','utilities','otherFixed']},
+  {label:'変動費・買取',icon:'ti-shopping-bag',color:'#8a6200',keys:['kaitori','otherVar']},
+  {label:'公的支払い（税金・社会保険）',icon:'ti-building-bank',color:'#7b1fa2',keys:['k_kouseiNenkin','k_tax_shakai','k_tax_hojin','k_tax_shikenmin','k_tax_kotei','k_kouko_repay','k_tax_other'],public:true},
+];
+
+const SECTIONS_minami_staff = [
+  {key:'sales',label:'売上収入',icon:'ti-cash',color:'#1a4f8a',ph:'例：洗濯・乾燥売上'},
+  {key:'detergent',label:'洗剤販売',icon:'ti-droplet',color:'#1a4f8a',ph:'例：洗剤・柔軟剤販売'},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'rent',label:'家賃・賃料',icon:'ti-home',color:'#b03020',ph:'例：店舗家賃'},
+  {key:'water',label:'水道代',icon:'ti-droplet',color:'#b03020',single:true},
+  {key:'elec',label:'電気代',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'gas',label:'ガス代',icon:'ti-flame',color:'#b03020',single:true},
+  {key:'machLease',label:'機械リース',icon:'ti-tool',color:'#b03020',ph:'例：洗濯機・乾燥機リース'},
+  {key:'otherFixed',label:'その他固定費',icon:'ti-building',color:'#b03020',ph:'例：通信費、保険料'},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品、清掃費'},
+  {key:'m_kouseiNenkin',label:'厚生年金',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'m_tax_shakai',label:'社会保険料',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'m_tax_hojin',label:'法人税',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'m_tax_shikenmin',label:'市県民税',icon:'ti-building-community',color:'#7b1fa2',single:true,public:true},
+  {key:'m_tax_kotei',label:'固定資産税',icon:'ti-home-2',color:'#7b1fa2',single:true,public:true},
+  {key:'m_kouko_repay',label:'公庫借入返済',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'m_tax_other',label:'その他公的支払い',icon:'ti-receipt-tax',color:'#7b1fa2',single:true,public:true},
+];
+const CATS_minami_staff = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['sales','detergent','otherIncome']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['rent','water','elec','gas','machLease','otherFixed']},
+  {label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',keys:['otherVar']},
+  {label:'公的支払い（税金・社会保険）',icon:'ti-building-bank',color:'#7b1fa2',keys:['m_kouseiNenkin','m_tax_shakai','m_tax_hojin','m_tax_shikenmin','m_tax_kotei','m_kouko_repay','m_tax_other'],public:true},
+];
+
+// ══════════ 代表者入力用（固定費・人件費など）══════════
+const SECTIONS_honten_hq = [
+  {key:'labor_yamasiro',label:'役員報酬｜山城 奈り子',icon:'ti-user-check',color:'#b03020',single:true},
+  {key:'labor_murakami',label:'役員報酬｜村上 市子',icon:'ti-user-check',color:'#b03020',single:true},
+  {key:'labor_bonus',label:'役員賞与（3・8・12月）',icon:'ti-gift',color:'#b03020',single:true,bonusOnly:true},
+];
+const CATS_honten_hq = [
+  {label:'役員報酬',icon:'ti-user-check',color:'#b03020',keys:['labor_yamasiro','labor_murakami','labor_bonus']},
+];
+
+const SECTIONS_kitag_hq = [
+  {key:'labor',label:'人件費',icon:'ti-users',color:'#b03020',ph:'例：スタッフ名'},
+];
+const CATS_kitag_hq = [
+  {label:'人件費',icon:'ti-users',color:'#b03020',keys:['labor']},
+];
+
+function getStaffSections(sid){if(sid==='s1')return SECTIONS_honten_staff;if(sid==='s2')return SECTIONS_kitag_staff;return SECTIONS_minami_staff;}
+function getStaffCats(sid){if(sid==='s1')return CATS_honten_staff;if(sid==='s2')return CATS_kitag_staff;return CATS_minami_staff;}
+function getHQSections(sid){if(sid==='s1')return SECTIONS_honten_hq;if(sid==='s2')return SECTIONS_kitag_hq;return [];}
+function getHQCats(sid){if(sid==='s1')return CATS_honten_hq;if(sid==='s2')return CATS_kitag_hq;return [];}
+
+
+const SECTIONS_honten = [
+  {key:'madoguchi',label:'窓口収入',icon:'ti-cash',color:'#1a4f8a',ph:'金額を入力',single:true},
+  {key:'ins_shakai',label:'社会保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_kokuho',label:'国民健康保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_kaigo',label:'介護保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_jibai',label:'自賠責保険',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_rousai',label:'労災',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'ins_seishin',label:'精神保健',icon:'ti-heart-rate-monitor',color:'#1a4f8a',single:true},
+  {key:'shisetsu_green',label:'施設｜グリーンハウス山宗',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_togen',label:'施設｜桃源の郷',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_fukugi',label:'施設｜ふくぎの里',icon:'ti-building-community',color:'#0f6e56',single:true},
+  {key:'shisetsu_zaitaku',label:'在宅訪問',icon:'ti-home-heart',color:'#0f6e56',single:true},
+  {key:'yachin',label:'家賃収入',icon:'ti-home-dollar',color:'#1a4f8a',ph:'金額を入力',single:true},
+  {key:'card',label:'カード収入',icon:'ti-credit-card',color:'#1a4f8a',ph:'金額を入力',single:true},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'tax',label:'消費税（預り）',icon:'ti-percentage',color:'#6b6a64',ph:'消費税額',single:true},
+  {key:'labor_yamasiro',label:'役員報酬｜山城 奈り子',icon:'ti-user-check',color:'#b03020',single:true},
+  {key:'labor_murakami',label:'役員報酬｜村上 市子',icon:'ti-user-check',color:'#b03020',single:true},
+  {key:'labor_bonus',label:'役員賞与（3・8・12月）',icon:'ti-gift',color:'#b03020',single:true,bonusOnly:true},
+  {key:'rent_daito',label:'大東建託',icon:'ti-home',color:'#b03020',single:true,defaultVal:78170},
+  {key:'rent_meiko',label:'明光不動産',icon:'ti-home',color:'#b03020',single:true,defaultVal:80110},
+  {key:'water1f',label:'水道 1F',icon:'ti-droplet',color:'#b03020',single:true},
+  {key:'water2f',label:'水道 2F',icon:'ti-droplet',color:'#b03020',single:true},
+  {key:'elec1f1',label:'電気 1F-1',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'elec1f2',label:'電気 1F-2',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'elec2f',label:'電気 2F',icon:'ti-bolt',color:'#b03020',single:true},
+  {key:'gas1f',label:'ガス 1F',icon:'ti-flame',color:'#b03020',single:true},
+  {key:'gas2f',label:'ガス 2F',icon:'ti-flame',color:'#b03020',single:true},
+  {key:'kouseiNenkin',label:'厚生年金',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_shakai',label:'社会保険料',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_hojin',label:'法人税',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_shikenmin',label:'市県民税',icon:'ti-building-community',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_kotei',label:'固定資産税',icon:'ti-home-2',color:'#7b1fa2',single:true,public:true},
+  {key:'kouko_repay',label:'公庫借入返済',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'tax_other',label:'その他公的支払い',icon:'ti-receipt-tax',color:'#7b1fa2',single:true,public:true},
+  {key:'hikari',label:'光通信工業',icon:'ti-wifi',color:'#5a4200',single:true},
+  {key:'kakehashi',label:'カケハシJCB',icon:'ti-credit-card',color:'#5a4200',single:true,defaultVal:47278},
+  {key:'ricoh',label:'リコーリース',icon:'ti-printer',color:'#5a4200',single:true,defaultVal:117480},
+  {key:'fujifilm',label:'富士フィルム',icon:'ti-camera',color:'#5a4200',single:true},
+  {key:'sharp',label:'シャープファイナンス',icon:'ti-device-laptop',color:'#5a4200',single:true},
+  {key:'docomo',label:'ドコモビジネス',icon:'ti-device-mobile',color:'#5a4200',single:true,defaultVal:4433},
+  {key:'ryugin',label:'琉銀BIZネット',icon:'ti-building-bank',color:'#5a4200',single:true,defaultVal:2200},
+  {key:'orico',label:'オリコ',icon:'ti-credit-card',color:'#5a4200',single:true,defaultVal:133320},
+  {key:'ryuanzen',label:'琉球保安',icon:'ti-shield',color:'#5a4200',single:true,defaultVal:12100},
+  {key:'ryudc',label:'琉球DC',icon:'ti-server',color:'#5a4200',single:true},
+  {key:'daiichi',label:'第一生命',icon:'ti-shield',color:'#b03020',single:true,defaultVal:24669},
+  {key:'yakuzaishi',label:'沖）薬剤師会',icon:'ti-medical-cross',color:'#b03020',single:true},
+  {key:'nisseiCar',label:'車ニッセイ保険',icon:'ti-car',color:'#5a4200',single:true,defaultVal:6450},
+  {key:'nisseiYama',label:'ニッセイ生命（山城）',icon:'ti-shield-check',color:'#5a4200',single:true,defaultVal:18377},
+  {key:'nisseiLife',label:'ニッセイ生命保険',icon:'ti-shield-check',color:'#5a4200',single:true,defaultVal:12460},
+  {key:'nhk',label:'NHK受信料',icon:'ti-antenna',color:'#5a4200',single:true,defaultVal:1930},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品、広告費'},
+];
+const CATS_honten = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['madoguchi','ins_shakai','ins_kokuho','ins_kaigo','ins_jibai','ins_rousai','ins_seishin','yachin','card','otherIncome','tax']},
+  {label:'施設収入',icon:'ti-building-community',color:'#0f6e56',keys:['shisetsu_green','shisetsu_togen','shisetsu_fukugi','shisetsu_zaitaku']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['labor_yamasiro','labor_murakami','labor_bonus','rent_daito','rent_meiko','water1f','water2f','elec1f1','elec1f2','elec2f','gas1f','gas2f','daiichi','yakuzaishi']},
+  {label:'公的支払い（税金・社会保険）',icon:'ti-building-bank',color:'#7b1fa2',keys:['kouseiNenkin','tax_shakai','tax_hojin','tax_shikenmin','tax_kotei','kouko_repay','tax_other'],public:true},
+  {label:'諸経費（リース・通信・保険）',icon:'ti-receipt',color:'#5a4200',keys:['hikari','kakehashi','ricoh','fujifilm','sharp','docomo','ryugin','orico','ryuanzen','ryudc','nisseiCar','nisseiYama','nisseiLife','nhk']},
+];
+
+// ══════════ 北口店（リサイクル業）用 ══════════
+const SECTIONS_kitag = [
+  {key:'sales',label:'売上収入',icon:'ti-cash',color:'#1a4f8a',ph:'例：リサイクル売上'},
+  {key:'gaishutsu',label:'外出収入',icon:'ti-truck-delivery',color:'#1a4f8a',ph:'例：配達・出張売上'},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'labor',label:'人件費',icon:'ti-users',color:'#b03020',ph:'例：スタッフ名'},
+  {key:'rent',label:'家賃・賃料',icon:'ti-home',color:'#b03020',ph:'例：店舗家賃'},
+  {key:'utilities',label:'水道光熱費',icon:'ti-bolt',color:'#b03020',ph:'例：電気代'},
+  {key:'otherFixed',label:'その他固定費',icon:'ti-building',color:'#b03020',ph:'例：通信費、保険料'},
+  {key:'kaitori',label:'買取・仕入れ',icon:'ti-shopping-bag',color:'#8a6200',ph:'例：商品買取'},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品、広告費'},
+  {key:'k_kouseiNenkin',label:'厚生年金',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_shakai',label:'社会保険料',icon:'ti-shield-check',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_hojin',label:'法人税',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_shikenmin',label:'市県民税',icon:'ti-building-community',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_kotei',label:'固定資産税',icon:'ti-home-2',color:'#7b1fa2',single:true,public:true},
+  {key:'k_kouko_repay',label:'公庫借入返済',icon:'ti-building-bank',color:'#7b1fa2',single:true,public:true},
+  {key:'k_tax_other',label:'その他公的支払い',icon:'ti-receipt-tax',color:'#7b1fa2',single:true,public:true},
+];
+const CATS_kitag = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['sales','gaishutsu','otherIncome']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['labor','rent','utilities','otherFixed']},
+  {label:'変動費・買取',icon:'ti-shopping-bag',color:'#8a6200',keys:['kaitori','otherVar']},
+  {label:'公的支払い（税金・社会保険）',icon:'ti-building-bank',color:'#7b1fa2',keys:['k_kouseiNenkin','k_tax_shakai','k_tax_hojin','k_tax_shikenmin','k_tax_kotei','k_kouko_repay','k_tax_other'],public:true},
+];
+
+// ══════════ 南店用（金曜日に設定予定）══════════
+const SECTIONS_minami = [
+  {key:'sales',label:'売上収入',icon:'ti-cash',color:'#1a4f8a',ph:'例：売上'},
+  {key:'otherIncome',label:'その他収入',icon:'ti-coins',color:'#1a4f8a',ph:'例：補助金、雑収入'},
+  {key:'labor',label:'人件費',icon:'ti-users',color:'#b03020',ph:'例：スタッフ名'},
+  {key:'rent',label:'家賃・賃料',icon:'ti-home',color:'#b03020',ph:'例：店舗家賃'},
+  {key:'utilities',label:'水道光熱費',icon:'ti-bolt',color:'#b03020',ph:'例：電気代'},
+  {key:'otherFixed',label:'その他固定費',icon:'ti-building',color:'#b03020',ph:'例：通信費、保険料'},
+  {key:'otherVar',label:'その他変動費',icon:'ti-receipt-2',color:'#8a6200',ph:'例：消耗品、広告費'},
+];
+const CATS_minami = [
+  {label:'収入',icon:'ti-coin',color:'#1a4f8a',keys:['sales','otherIncome']},
+  {label:'固定費',icon:'ti-building',color:'#b03020',keys:['labor','rent','utilities','otherFixed']},
+  {label:'変動費',icon:'ti-receipt-2',color:'#8a6200',keys:['otherVar']},
+];
+
+// 店舗IDに応じてSECTIONS・CATSを切り替え
+function getSections(storeId){
+  if(storeId==='s1')return SECTIONS_honten;
+  if(storeId==='s2')return SECTIONS_kitag;
+  return SECTIONS_minami;
+}
+function getCats(storeId){
+  if(storeId==='s1')return CATS_honten;
+  if(storeId==='s2')return CATS_kitag;
+  return CATS_minami;
+}
+let SECTIONS=SECTIONS_honten;
+let CATS=CATS_honten;
+
+function initFormData(rec){
+  formData={};
+  const DEFAULTS=state.storeId==='s1'?{
+    rent_daito:78170,rent_meiko:80110,
+    kakehashi:47278,ricoh:117480,docomo:4433,ryugin:2200,
+    orico:133320,ryuanzen:12100,daiichi:24669,
+    nisseiCar:6450,nisseiYama:18377,nisseiLife:12460,nhk:1930,
+  }:{};
+  SECTIONS.forEach(s=>{
+    if(s.single){
+      const saved=rec?.[s.key];
+      formData[s.key]=(saved!=null&&saved!=='')?saved:(DEFAULTS[s.key]??'');
+    }else{
+      formData[s.key]=(rec&&rec[s.key]&&rec[s.key].length)
+        ?rec[s.key].map(i=>({...i}))
+        :[{id:uid(),name:'',amount:''}];
+    }
+  });
+}
+
+// ══════════════════════════════
+//  役割選択
+// ══════════════════════════════
+function renderRoleSelect(){
+  el('app').innerHTML=`
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:var(--bg)">
+    <div style="text-align:center;margin-bottom:36px">
+      <i class="ti ti-building-store" style="font-size:56px;color:var(--text2)"></i>
+      <div style="font-size:24px;font-weight:800;margin-top:12px;margin-bottom:6px">店舗税務管理</div>
+      <div style="font-size:14px;color:var(--text2)">アクセス区分を選択してください</div>
+    </div>
+    <div style="width:100%;max-width:400px">
+      <button class="role-card" onclick="selectStoreCard('s1','本店（薬局）',true)">
+        <i class="ti ti-medical-cross" style="font-size:38px;color:var(--text2)"></i>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700;margin-bottom:3px">薬局</div>
+          <div style="font-size:13px;color:var(--text2)">月次データの入力・送信</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--text3);font-size:20px"></i>
+      </button>
+      <button class="role-card" onclick="selectStoreCard('s2','北口店（リサイクル）',false)">
+        <i class="ti ti-recycle" style="font-size:38px;color:var(--text2)"></i>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700;margin-bottom:3px">リサイクル</div>
+          <div style="font-size:13px;color:var(--text2)">月次データの入力・送信</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--text3);font-size:20px"></i>
+      </button>
+      <button class="role-card" onclick="selectStoreCard('s3','南店',false)">
+        <i class="ti ti-building-store" style="font-size:38px;color:var(--text2)"></i>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700;margin-bottom:3px">南店</div>
+          <div style="font-size:13px;color:var(--text2)">月次データの入力・送信</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--text3);font-size:20px"></i>
+      </button>
+      <button class="role-card" onclick="state.role='hq';renderHQLogin()">
+        <i class="ti ti-shield-lock" style="font-size:38px;color:var(--text2)"></i>
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:700;margin-bottom:3px">株式会社Kany's</div>
+          <div style="font-size:13px;color:var(--text2)">全店舗レポートの確認</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--text3);font-size:20px"></i>
+      </button>
+    </div>
+  </div>`;
+}
+
+function selectStoreCard(id, name, needsPw){
+  if(needsPw){
+    renderStoreLogin(id, name);
+  } else {
+    state.role='store';
+    selectStore(id, name);
+  }
+}
+
+function renderStoreLogin(id, name){
+  el('app').innerHTML=`
+  <div class="login-wrap">
+    <div class="login-box">
+      <div style="text-align:center;margin-bottom:24px">
+        <i class="ti ti-medical-cross" style="font-size:52px;color:var(--text2)"></i>
+        <div style="font-size:20px;font-weight:800;margin-top:10px">${name}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">パスワードを入力してください</div>
+      </div>
+      <div id="store-login-err" class="login-err">パスワードが違います</div>
+      <div class="field"><label>パスワード</label>
+        <input type="password" id="store-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doStoreLogin('${id}','${name}')">
+      </div>
+      <button class="btn btn-primary btn-block" onclick="doStoreLogin('${id}','${name}')"><i class="ti ti-login"></i> ログイン</button>
+      <button class="btn btn-block" style="margin-top:8px" onclick="renderRoleSelect()"><i class="ti ti-arrow-left"></i> 戻る</button>
+    </div>
+  </div>`;
+  setTimeout(()=>el('store-pw')?.focus(),100);
+}
+
+function doStoreLogin(id, name){
+  if(el('store-pw').value===HQ_PW){
+    state.role='store';
+    selectStore(id, name);
+  } else {
+    el('store-login-err').style.display='block';
+  }
+}
+
+// ══════════════════════════════
+//  店舗スタッフ：店舗選択
+// ══════════════════════════════
+function renderStoreSelect(){
+  const stores=getStores();
+  el('app').innerHTML=`
+  <div class="topbar">
+    <button class="btn-icon" onclick="renderRoleSelect()"><i class="ti ti-arrow-left" style="font-size:20px"></i></button>
+    <div><div class="topbar-title">店舗を選択</div></div>
+    <div style="width:36px"></div>
+  </div>
+  <div style="padding:16px">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px">あなたの店舗を選択してください</div>
+    ${stores.map(s=>`
+    <button class="store-card" onclick="selectStore('${s.id}','${s.name}')">
+      <div>
+        <div style="font-size:16px;font-weight:700">${s.name}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:2px">${s.manager||''}</div>
+      </div>
+      <i class="ti ti-chevron-right" style="color:var(--text3);font-size:20px"></i>
+    </button>`).join('')}
+  </div>`;
+}
+
+function selectStore(id,name){
+  state.storeId=id;state.storeName=name;
+  SECTIONS=getStaffSections(id);
+  CATS=getStaffCats(id);
+  renderStoreApp();
+}
+
+// ══════════════════════════════
+//  店舗スタッフ：入力画面
+// ══════════════════════════════
+function renderStoreApp(){
+  el('app').innerHTML=`
+  <div class="topbar">
+    <button class="btn-icon" onclick="renderRoleSelect()"><i class="ti ti-arrow-left" style="font-size:20px"></i></button>
+    <div>
+      <div class="topbar-title">${state.storeName}</div>
+      <div class="topbar-sub">入力・送信</div>
+    </div>
+    <button class="btn-icon" onclick="renderRoleSelect()"><i class="ti ti-logout" style="font-size:20px"></i></button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="st-input" onclick="swSTab('input')"><i class="ti ti-edit"></i> 月次入力</button>
+    ${state.storeId==='s1'?'<button class="tab" id="st-purchase" onclick="swSTab(\'purchase\')"><i class="ti ti-truck"></i> 仕入れ入力</button>':''}
+    <button class="tab" id="st-receipt" onclick="swSTab('receipt')"><i class="ti ti-camera"></i> レシート読取</button>
+    <button class="tab" id="st-history" onclick="swSTab('history')"><i class="ti ti-history"></i> 送信履歴</button>
+  </div>
+
+  <!-- 月次入力 -->
+  <div id="pane-input" style="padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <label style="font-size:13px;color:var(--text2);white-space:nowrap">対象月</label>
+      <input type="month" id="s-month" value="${ym()}" onchange="loadStoreForm()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div id="status-bar"></div>
+    <div id="form-sections"></div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <span>サマリー</span><span style="font-size:11px;color:var(--text2);font-weight:400">自動集計</span>
+      </div>
+      <div class="sum-row"><span style="color:var(--text2)">収入合計</span><span style="font-weight:700" id="ss-inc">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち 窓口収入</span><span style="color:var(--text2)" id="ss-mad">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち 保険収入計</span><span style="color:var(--text2)" id="ss-ins">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち 施設収入計</span><span style="color:var(--text2)" id="ss-shisetsu">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち 家賃収入</span><span style="color:var(--text2)" id="ss-yachin">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち カード収入</span><span style="color:var(--text2)" id="ss-card">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2)">固定費合計</span><span style="color:var(--red);font-weight:700" id="ss-fix">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2);padding-left:12px;font-size:13px">うち 役員報酬計</span><span style="color:var(--text2)" id="ss-lab">¥0</span></div>
+      <div class="sum-row"><span style="color:#7b1fa2;font-weight:700">公的支払い合計</span><span style="color:#7b1fa2;font-weight:700" id="ss-pub">¥0</span></div>
+      <div class="sum-row"><span style="color:var(--text2)">諸経費合計</span><span style="color:#5a4200;font-weight:700" id="ss-misc">¥0</span></div>
+      <div class="sum-row total">
+        <span style="font-weight:700;font-size:15px">営業利益（概算）</span>
+        <span style="font-size:22px;font-weight:800" id="ss-prf">¥0</span>
+      </div>
+      <div style="margin-top:16px">
+        <div class="field"><label>メモ・備考</label><input type="text" id="f-memo" placeholder="特記事項があれば"></div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn" style="flex:1" onclick="saveDraft()"><i class="ti ti-device-floppy"></i> 下書き</button>
+          <button class="btn btn-send" style="flex:2" id="btn-send" onclick="sendToHQ()"><i class="ti ti-send"></i> 本社へ送信</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- レシート読取 -->
+  <div id="pane-receipt" style="padding:16px;display:none">
+    <div class="ai-panel">
+      <div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.05em;text-transform:uppercase"><i class="ti ti-sparkles"></i> AIレシート自動読み取り</div>
+      <p style="font-size:13px;color:#534AB7;margin-bottom:12px">レシート・領収書を撮影すると金額・科目を自動判定して入力フォームへ反映します</p>
+      <div class="drop-zone" onclick="el('file-input').click()">
+        <input type="file" id="file-input" accept="image/*" onchange="handleFile(event)" style="display:none">
+        <i class="ti ti-photo"></i>
+        <div style="font-weight:700;margin-bottom:4px">写真を選択してアップロード</div>
+        <div style="font-size:12px;opacity:.7">タップして写真ライブラリから選ぶ</div>
+      </div>
+      <div id="preview-wrap" style="display:none;margin-top:12px;text-align:center">
+        <img id="receipt-img" style="max-width:100%;max-height:200px;border-radius:var(--rsm);border:.5px solid #AFA9EC" alt="レシート">
+        <div id="ai-thinking" class="thinking"><div class="spin"></div>AIが読み取っています...</div>
+      </div>
+      <div id="ai-result" class="ai-result">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;letter-spacing:.05em;text-transform:uppercase">読み取り結果</div>
+        <div id="ai-result-items"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-primary" style="flex:1" onclick="applyReceipt()"><i class="ti ti-check"></i> フォームへ反映</button>
+          <button class="btn" onclick="resetReceipt()">やり直し</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><div>反映後は「月次入力」タブで内容を確認・修正できます</div></div>
+  </div>
+
+  <!-- 送信履歴 -->
+  <div id="pane-history" style="padding:16px;display:none">
+    <div id="history-wrap"><div class="card" style="text-align:center;padding:20px;color:var(--text2)">読み込み中...</div></div>
+  </div>
+
+  <!-- 仕入れ入力 -->
+  <div id="pane-purchase" style="padding:16px;display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <label style="font-size:13px;color:var(--text2);white-space:nowrap">仕入れ月</label>
+      <input type="month" id="pu-month" value="${ym()}" onchange="loadPurchaseForm()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><div>仕入れた月の請求額を入力してください。支払いは翌々月に自動計算されます。</div></div>
+    <div id="purchase-form"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-send" style="flex:1;justify-content:center" onclick="savePurchase()"><i class="ti ti-device-floppy"></i> 仕入れを保存・送信</button>
+    </div>
+    <div id="pu-save-msg" style="font-size:12px;color:var(--green);margin-top:10px;display:none"></div>
+  </div>`;
+
+  initFormData(null);
+  loadStoreForm();
+}
+
+function swSTab(tab){
+  ['input','purchase','receipt','history'].forEach(t=>{
+    el('st-'+t)?.classList.toggle('active',t===tab);
+    const p=el('pane-'+t);if(p)p.style.display=t===tab?'block':'none';
+  });
+  if(tab==='history')loadHistory();
+  if(tab==='purchase'&&state.storeId==='s1')loadPurchaseForm();
+}
+
+function renderFormSections(){
+  const c=el('form-sections');if(!c)return;
+  c.innerHTML='';
+  CATS.forEach(cat=>{
+    const div=document.createElement('div');
+    div.className='card';
+    const isPub=cat.public;
+    const borderStyle=isPub?'border:1.5px solid #7b1fa2;background:#fdf4ff;':'';
+    div.style.cssText=isPub?'border:1.5px solid #7b1fa2;background:#fdf4ff;margin-bottom:12px;border-radius:var(--r);padding:16px;':'';
+    if(!isPub)div.className='card';
+    div.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${isPub?'#7b1fa2':'var(--text2)'};display:flex;align-items:center;gap:6px">
+        ${isPub?'<i class="ti ti-alert-triangle" style="color:#7b1fa2"></i>':'<i class="ti '+cat.icon+'"></i>'}${cat.label}
+      </div>
+      <div style="font-size:14px;font-weight:700;color:${cat.color}" id="cat-tot-${cat.keys[0]}">¥0</div>
+    </div>
+    ${isPub?'<div style="font-size:11px;color:#7b1fa2;margin-bottom:10px">市・国・県への支払い — 重要</div>':''}
+    <div id="cat-in-${cat.keys[0]}"></div>`;
+    c.appendChild(div);
+    const inner=el('cat-in-'+cat.keys[0]);
+    cat.keys.forEach(key=>{
+      const sec=SECTIONS.find(s=>s.key===key);
+      if(sec.single){
+        // 賞与月（3・8・12月）以外は非表示
+        const mo=el('s-month')?.value||'';
+        const moNum=parseInt(mo.split('-')[1]||'0');
+        if(sec.bonusOnly&&![3,8,12].includes(moNum))return;
+        const row=document.createElement('div');
+        row.className='sec-block';
+        const isBonusMo=sec.bonusOnly;
+        row.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:.5px solid var(--border);${isBonusMo?'background:#fff8e1;':''}">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:${sec.color}">
+            <i class="ti ${sec.icon}"></i>${sec.label}${isBonusMo?' <span style="font-size:10px;background:#f57f17;color:#fff;padding:2px 6px;border-radius:10px;margin-left:4px">今月</span>':''}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="sf-${key}" value="${formData[key]||''}" placeholder="0" min="0" inputmode="numeric"
+              style="width:120px;text-align:right;padding:7px 10px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);font-size:14px;color:${sec.color}"
+              oninput="formData['${key}']=parseFloat(this.value)||0;recalc()">
+            <span style="font-size:12px;color:var(--text2)">円</span>
+          </div>
+        </div>`;
+        inner.appendChild(row);
+      }else{
+        // 明細入力（収入・人件費・買取など）
+        const blk=document.createElement('div');
+        blk.className='sec-block';blk.id='blk-'+key;
+        blk.innerHTML=`<div class="sec-head">
+          <div class="sec-head-left" style="color:${sec.color}"><i class="ti ${sec.icon}"></i>${sec.label}</div>
+          <span class="sec-sub" style="color:${sec.color}" id="sub-${key}">${fmt(sumItems(formData[key]))}</span>
+        </div>
+        <div id="rows-${key}"></div>
+        <button class="btn-add-row" onclick="addRow('${key}')"><i class="ti ti-plus"></i> 明細を追加</button>`;
+        inner.appendChild(blk);
+        renderRows(key);
+      }
+    });
+  });
+}
+
+function renderRows(key){
+  const c=el('rows-'+key);if(!c)return;
+  const sec=SECTIONS.find(s=>s.key===key);
+  c.innerHTML='';
+  (formData[key]||[]).forEach(item=>appendRowEl(key,item,sec,c));
+}
+
+function appendRowEl(key,item,sec,c){
+  if(!sec)sec=SECTIONS.find(s=>s.key===key);
+  if(!c)c=el('rows-'+key);
+  if(!c)return;
+  const row=document.createElement('div');
+  row.className='detail-row';row.id='dr-'+item.id;
+  row.innerHTML=`<div class="dr-name"><input type="text" placeholder="${sec.ph}" value="${item.name||''}" inputmode="text" oninput="updateItem('${key}','${item.id}','name',this.value)"></div>
+    <div class="dr-amt"><input type="number" placeholder="0" value="${item.amount||''}" min="0" inputmode="numeric" style="color:${sec.color}" oninput="updateItem('${key}','${item.id}','amount',parseFloat(this.value)||0)"><span class="dr-unit">円</span></div>
+    <button class="btn-del" onclick="removeRow('${key}','${item.id}')"><i class="ti ti-x"></i></button>`;
+  c.appendChild(row);
+}
+
+function addRow(key){
+  const item={id:uid(),name:'',amount:''};
+  formData[key].push(item);
+  appendRowEl(key,item,null,null);
+  el('dr-'+item.id)?.querySelector('input[type=text]')?.focus();
+  recalc();
+}
+
+function removeRow(key,id){
+  if((formData[key]||[]).length<=1){
+    const it=formData[key].find(i=>i.id===id);
+    if(it){it.name='';it.amount='';}
+    el('dr-'+id)?.querySelectorAll('input').forEach(e=>e.value='');
+    recalc();return;
+  }
+  formData[key]=formData[key].filter(i=>i.id!==id);
+  el('dr-'+id)?.remove();
+  recalc();
+}
+
+function updateItem(key,id,field,val){
+  const it=(formData[key]||[]).find(i=>i.id===id);
+  if(it)it[field]=val;
+  recalc();
+}
+
+function recalc(){
+  const sid=state.storeId;
+  let inc=0,fix=0,misc=0,pub=0,vr=0,lab=0,mad=0,ins=0,shisetsu=0,yachin=0,card=0;
+
+  if(sid==='s1'){
+    // 本店専用計算
+    mad=parseFloat(formData.madoguchi)||0;
+    const insKeys=['ins_shakai','ins_kokuho','ins_kaigo','ins_jibai','ins_rousai','ins_seishin'];
+    const shisetsuKeys=['shisetsu_green','shisetsu_togen','shisetsu_fukugi','shisetsu_zaitaku'];
+    ins=insKeys.reduce((s,k)=>s+(parseFloat(formData[k])||0),0);
+    shisetsu=shisetsuKeys.reduce((s,k)=>s+(parseFloat(formData[k])||0),0);
+    yachin=parseFloat(formData.yachin)||0;
+    card=parseFloat(formData.card)||0;
+    inc=mad+ins+shisetsu+yachin+card+sumItems(formData.otherIncome);
+    lab=(parseFloat(formData.labor_yamasiro)||0)+(parseFloat(formData.labor_murakami)||0)+(parseFloat(formData.labor_bonus)||0);
+    const utils=['water1f','water2f','elec1f1','elec1f2','elec2f','gas1f','gas2f'];
+    fix=lab
+      +(parseFloat(formData.rent_daito)||78170)
+      +(parseFloat(formData.rent_meiko)||80110)
+      +utils.reduce((s,k)=>s+(parseFloat(formData[k])||0),0)
+      +(parseFloat(formData.daiichi)||24669)
+      +(parseFloat(formData.yakuzaishi)||0);
+    const miscKeys=['hikari','kakehashi','ricoh','fujifilm','sharp','docomo','ryugin','orico','ryuanzen','ryudc','nisseiCar','nisseiYama','nisseiLife','nhk'];
+    const DEF={kakehashi:47278,ricoh:117480,docomo:4433,ryugin:2200,orico:133320,ryuanzen:12100,nisseiCar:6450,nisseiYama:18377,nisseiLife:12460,nhk:1930};
+    misc=miscKeys.reduce((s,k)=>s+(parseFloat(formData[k])||DEF[k]||0),0);
+    const pubKeys=['kouseiNenkin','tax_shakai','tax_hojin','tax_shikenmin','tax_kotei','kouko_repay','tax_other'];
+    pub=pubKeys.reduce((s,k)=>s+(parseFloat(formData[k])||0),0);
+    vr=sumItems(formData.otherVar);
+  } else {
+    // 北口・南店：入力した金額だけ集計（デフォルト値なし）
+    inc=sumItems(formData.sales)+sumItems(formData.gaishutsu)+sumItems(formData.detergent)+sumItems(formData.otherIncome);
+    fix=sumItems(formData.rent)+sumItems(formData.utilities)+sumItems(formData.otherFixed)
+      +(parseFloat(formData.water)||0)+(parseFloat(formData.elec)||0)+(parseFloat(formData.gas)||0)
+      +sumItems(formData.machLease);
+    vr=sumItems(formData.kaitori)+sumItems(formData.otherVar);
+    if(state.storeId==='s2'){
+      const pubKeys=['k_kouseiNenkin','k_tax_shakai','k_tax_hojin','k_tax_shikenmin','k_tax_kotei','k_kouko_repay','k_tax_other'];
+      pub=pubKeys.reduce((s,k)=>s+(parseFloat(formData[k])||0),0);
+    } else {
+      const pubKeys=['m_kouseiNenkin','m_tax_shakai','m_tax_hojin','m_tax_shikenmin','m_tax_kotei','m_kouko_repay','m_tax_other'];
+      pub=pubKeys.reduce((s,k)=>s+(parseFloat(formData[k])||0),0);
+    }
+  }
+
+  const prf=inc-fix-misc-pub-vr;
+
+  // サブ合計更新（明細系）
+  ['otherIncome','labor','rent','kaitori','otherVar','sales','gaishutsu','utilities','otherFixed'].forEach(k=>{
+    const e=el('sub-'+k);if(e)e.textContent=fmt(sumItems(formData[k]));
+  });
+
+  // カテゴリ合計更新
+  CATS.forEach(cat=>{
+    const e=el('cat-tot-'+cat.keys[0]);if(!e)return;
+    const t=cat.keys.reduce((s,k)=>{
+      const sec=SECTIONS.find(x=>x.key===k);
+      return s+(sec?.single?(parseFloat(formData[k])||0):sumItems(formData[k]));
+    },0);
+    e.textContent=fmt(t);
+  });
+
+  const sv=(id,v)=>{const e=el(id);if(e)e.textContent=fmt(v);};
+  sv('ss-inc',inc);sv('ss-mad',mad);sv('ss-ins',ins);sv('ss-shisetsu',shisetsu);sv('ss-yachin',yachin);sv('ss-card',card);
+  sv('ss-fix',fix);sv('ss-lab',lab);sv('ss-misc',misc);sv('ss-pub',pub);sv('ss-var',vr);
+  const p=el('ss-prf');if(p){p.textContent=fmt(prf);p.style.color=prf>=0?'var(--green)':'var(--red)';}
+}
+
+function loadStoreForm(){
+  const mo=el('s-month')?.value;if(!mo)return;
+  const rec=loadRec(state.storeId,mo);
+  initFormData(rec);
+  renderFormSections();
+  const memo=el('f-memo');if(memo)memo.value=rec?.memo||'';
+  recalc();
+  updateStatusBar(rec);
+}
+
+function updateStatusBar(rec){
+  const bar=el('status-bar');if(!bar)return;
+  if(!rec){bar.innerHTML='';return;}
+  if(rec.sentToHQ){
+    bar.innerHTML=`<div class="banner" style="background:var(--green-bg);border:.5px solid #9FE1CB">
+      <span style="color:var(--green);font-size:13px"><span class="dot dot-g"></span>本社送信済み — ${new Date(rec.sentAt).toLocaleString('ja-JP')}</span>
+      <button class="btn btn-sm" onclick="sendToHQ()"><i class="ti ti-refresh"></i> 再送信</button>
+    </div>`;
+  }else{
+    bar.innerHTML=`<div class="banner" style="background:var(--red-bg);border:.5px solid #F7C1C1;color:var(--red);font-size:13px">
+      <span><span class="dot dot-r"></span>下書き保存済み — 本社への送信がまだです</span>
+    </div>`;
+  }
+}
+
+function buildRecord(sentToHQ){
+  const rec={storeId:state.storeId,storeName:state.storeName,month:el('s-month')?.value,memo:el('f-memo')?.value||'',sentToHQ,updatedAt:new Date().toISOString(),sentAt:sentToHQ?new Date().toISOString():null};
+  SECTIONS.forEach(s=>{
+    if(s.single){
+      rec[s.key]=parseFloat(formData[s.key])||0;
+    }else{
+      rec[s.key]=(formData[s.key]||[]).filter(i=>i.name||i.amount).map(i=>({id:i.id,name:i.name||'',amount:parseFloat(i.amount)||0}));
+    }
+  });
+  return rec;
+}
+
+function saveDraft(){const rec=buildRecord(false);saveRec(rec);updateStatusBar(rec);toast('下書きを保存しました');}
+
+function sendToHQ(){
+  const btn=el('btn-send');
+  if(btn){btn.innerHTML='<span class="spin-sm"></span> 送信中...';btn.disabled=true;}
+  setTimeout(()=>{
+    const rec=buildRecord(true);saveRec(rec);
+    if(btn){btn.innerHTML='<i class="ti ti-send"></i> 本社へ送信';btn.disabled=false;}
+    updateStatusBar(rec);toast('本社へ送信しました！');
+  },900);
+}
+
+function loadHistory(){
+  const wrap=el('history-wrap');
+  const recs=loadStoreHistory(state.storeId);
+  if(!recs.length){wrap.innerHTML='<div class="card" style="text-align:center;padding:20px;color:var(--text2)">送信履歴がありません</div>';return;}
+  wrap.innerHTML='<div class="card"><div style="font-size:14px;font-weight:700;margin-bottom:12px">送信・保存履歴</div>'+
+    recs.map(r=>{
+      const p=incomeOf(r)-costsOf(r);
+      return`<div style="padding:12px 0;border-bottom:.5px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-weight:700">${r.month}</div>
+          <span class="badge ${r.sentToHQ?'bg-green':'bg-gray'}">${r.sentToHQ?'送信済':'下書き'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:12px;color:var(--text2)">
+          <span>収入<br><strong style="color:var(--text);font-size:14px">${fmt(incomeOf(r))}</strong></span>
+          <span>費用<br><strong style="color:var(--red);font-size:14px">${fmt(costsOf(r))}</strong></span>
+          <span>利益<br><strong style="color:${p>=0?'var(--green)':'var(--red)'};font-size:14px">${fmt(p)}</strong></span>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+}
+
+// ── 仕入れ管理 ──
+const SUPPLIERS=[
+  {id:'suzuken',name:'スズケン沖縄',payOffset:2},
+  {id:'daiko',name:'ダイコー沖縄',payOffset:2},
+  {id:'toho',name:'東邦株式会社',payOffset:2},
+  {id:'ryuyaku',name:'琉薬',payOffset:2},
+  {id:'jps',name:'ジェイピーエス',payOffset:1},
+  {id:'bene',name:'ベネセーレ夢三七',payOffset:1},
+  {id:'sanpo',name:'三方製薬',payOffset:1},
+];
+
+function savePurchaseRec(r){lsSet('pur_'+r.storeId+'_'+r.month,r);}
+function loadPurchaseRec(sid,mo){return lsGet('pur_'+sid+'_'+mo);}
+function loadAllPurchaseForMonth(mo){return getStores().map(s=>loadPurchaseRec(s.id,mo)).filter(Boolean);}
+
+function addMonths(ym,n){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y,m-1+n,1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+function loadPurchaseForm(){
+  const mo=el('pu-month')?.value;if(!mo)return;
+  const rec=loadPurchaseRec(state.storeId,mo);
+  const wrap=el('purchase-form');if(!wrap)return;
+
+  const nextMo=addMonths(mo,1);
+  const next2Mo=addMonths(mo,2);
+  const sup1=SUPPLIERS.filter(s=>s.payOffset===1);
+  const sup2=SUPPLIERS.filter(s=>s.payOffset===2);
+
+  const renderGroup=(sups,payMo,label)=>`
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700">${label}</div>
+        <div style="font-size:12px;color:var(--red);font-weight:600">支払い：<strong>${payMo}</strong></div>
+      </div>
+      ${sups.map(s=>{
+        const val=rec?.suppliers?.[s.id]||'';
+        return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:.5px solid var(--border)">
+          <div style="flex:1;font-size:14px;font-weight:600">${s.name}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="pu-${s.id}" value="${val}" placeholder="0" min="0" inputmode="numeric"
+              style="width:120px;text-align:right;padding:9px 10px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);font-size:14px">
+            <span style="font-size:13px;color:var(--text2)">円</span>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1.5px solid var(--text);margin-top:4px">
+        <div style="font-size:13px;font-weight:700">小計</div>
+        <div style="font-size:17px;font-weight:800;color:var(--red)" id="pu-sub-${payMo}">¥0</div>
+      </div>
+    </div>`;
+
+  wrap.innerHTML=
+    renderGroup(sup1,nextMo,'翌月払い（'+nextMo+'）')+
+    renderGroup(sup2,next2Mo,'翌々月払い（'+next2Mo+'）')+
+    `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:14px;font-weight:700">今月の仕入れ合計</div>
+        <div style="font-size:22px;font-weight:800;color:var(--red)" id="pu-total">¥0</div>
+      </div>
+    </div>`;
+
+  SUPPLIERS.forEach(s=>{
+    const inp=el('pu-'+s.id);
+    if(inp)inp.addEventListener('input',updatePuTotal);
+  });
+  updatePuTotal();
+}
+
+function updatePuTotal(){
+  const mo=el('pu-month')?.value||ym();
+  const next1=addMonths(mo,1),next2=addMonths(mo,2);
+  const sub1=SUPPLIERS.filter(s=>s.payOffset===1).reduce((s,sup)=>s+(parseFloat(el('pu-'+sup.id)?.value)||0),0);
+  const sub2=SUPPLIERS.filter(s=>s.payOffset===2).reduce((s,sup)=>s+(parseFloat(el('pu-'+sup.id)?.value)||0),0);
+  const e1=el('pu-sub-'+next1);if(e1)e1.textContent=fmt(sub1);
+  const e2=el('pu-sub-'+next2);if(e2)e2.textContent=fmt(sub2);
+  const t=el('pu-total');if(t)t.textContent=fmt(sub1+sub2);
+}
+
+function savePurchase(){
+  const mo=el('pu-month')?.value;if(!mo)return;
+  const suppliers={};
+  SUPPLIERS.forEach(s=>{suppliers[s.id]=parseFloat(el('pu-'+s.id)?.value)||0;});
+  const total=SUPPLIERS.reduce((s,sup)=>s+(suppliers[sup.id]||0),0);
+  const rec={storeId:state.storeId,storeName:state.storeName,month:mo,suppliers,total,savedAt:new Date().toISOString()};
+  savePurchaseRec(rec);
+  const msg=el('pu-save-msg');
+  const next1=addMonths(mo,1),next2=addMonths(mo,2);
+  if(msg){msg.textContent=`保存しました！翌月払い：${next1}／翌々月払い：${next2}`;msg.style.display='block';setTimeout(()=>msg.style.display='none',3500);}
+  toast('仕入れを保存しました！');
+}
+
+
+function handleFile(e){const f=e.target.files[0];if(f)processImage(f);}
+async function processImage(file){
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result.split(',')[1],mt=file.type;
+    el('receipt-img').src=e.target.result;
+    el('preview-wrap').style.display='block';
+    el('ai-thinking').style.display='flex';
+    el('ai-result').classList.remove('show');
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mt,data:b64}},
+          {type:'text',text:`このレシート・領収書・請求書の画像を読み取ってください。
+以下のJSON形式のみで返答してください。マークダウンや説明文は不要です。
+
+{"store_name":"店舗・会社名（不明なら空文字）","date":"日付YYYY-MM-DD形式（不明なら空文字）","items":[{"name":"品目名や内容","amount":半角数字の金額,"category":"窓口収入|出先収入|人件費|家賃|水道光熱費|その他固定費|買取|その他変動費|消費税","confidence":"高|中|低"}]}
+
+・amountは半角数字のみ（¥や円は不要）
+・読み取れない項目はitemsを空配列にする
+・合計金額は含めず、明細ごとに分けて返す`}
+        ]}]})
+      });
+      const data=await res.json();
+      el('ai-thinking').style.display='none';
+      const raw=data.content.map(c=>c.text||'').join('');
+      const match=raw.match(/\{[\s\S]*\}/);
+      if(!match)throw new Error('AIの返答を解析できませんでした。もう一度お試しください。');
+      receiptResult=JSON.parse(match[0]);
+      if(!receiptResult.items)receiptResult.items=[];
+      renderReceiptResult();
+    }catch(err){
+      el('ai-thinking').style.display='none';
+      el('ai-result-items').innerHTML=`<div style="color:var(--red);font-size:13px">読み取りエラー: ${err.message}</div>`;
+      el('ai-result').classList.add('show');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderReceiptResult(){
+  if(!receiptResult)return;
+  const cl={'窓口収入':'bg-blue','出先収入':'bg-blue','人件費':'bg-red','家賃':'bg-red','水道光熱費':'bg-red','その他固定費':'bg-red','買取':'bg-amber','その他変動費':'bg-amber','消費税':'bg-gray'};
+  let html='';
+  if(receiptResult.store_name)html+=`<div style="font-size:12px;color:var(--text2);margin-bottom:10px"><strong>${receiptResult.store_name}</strong>${receiptResult.date?' ／ '+receiptResult.date:''}</div>`;
+  html+=(receiptResult.items||[]).map(item=>`<div class="ai-result-row">
+    <div style="flex:1"><div style="font-weight:700;font-size:14px;margin-bottom:4px">${item.name}</div>
+    <span class="badge ${cl[item.category]||'bg-gray'}">${item.category}</span> <span style="font-size:11px;color:var(--text2);margin-left:4px">確度:${item.confidence}</span></div>
+    <div style="font-weight:700;font-size:15px;white-space:nowrap">${fmt(item.amount)}</div>
+  </div>`).join('');
+  if(!receiptResult.items?.length)html='<div style="text-align:center;padding:14px;color:var(--text2);font-size:13px">項目を読み取れませんでした</div>';
+  el('ai-result-items').innerHTML=html;
+  el('ai-result').classList.add('show');
+}
+
+function applyReceipt(){
+  if(!receiptResult?.items)return;
+  const map={'窓口収入':'madoguchi','出先収入':'desaki','人件費':'labor','家賃':'rent','水道光熱費':'utilities','その他固定費':'otherFixed','買取':'kaitori','その他変動費':'otherVar','消費税':'tax'};
+  receiptResult.items.forEach(item=>{
+    const key=map[item.category];if(!key)return;
+    const blank=(formData[key]||[]).find(i=>!i.name&&!i.amount);
+    if(blank){blank.name=item.name;blank.amount=item.amount;}
+    else formData[key].push({id:uid(),name:item.name,amount:item.amount});
+  });
+  renderFormSections();recalc();swSTab('input');toast('レシートの内容を反映しました！');
+}
+function resetReceipt(){el('preview-wrap').style.display='none';el('ai-result').classList.remove('show');el('file-input').value='';receiptResult=null;}
+
+// ══════════════════════════════
+//  代表者：ログイン
+// ══════════════════════════════
+function renderHQLogin(){
+  el('app').innerHTML=`
+  <div class="login-wrap">
+    <div class="login-box">
+      <div style="text-align:center;margin-bottom:24px">
+        <i class="ti ti-shield-lock" style="font-size:52px;color:var(--text2)"></i>
+        <div style="font-size:20px;font-weight:800;margin-top:10px">株式会社Kany's ログイン</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">全店舗レポートの確認</div>
+      </div>
+      <div id="login-err" class="login-err">パスワードが違います</div>
+      <div class="field"><label>パスワード</label><input type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()"><i class="ti ti-login"></i> ログイン</button>
+      <button class="btn btn-block" style="margin-top:8px" onclick="renderRoleSelect()"><i class="ti ti-arrow-left"></i> 戻る</button>
+    </div>
+  </div>`;
+  setTimeout(()=>el('pw')?.focus(),100);
+}
+
+function doLogin(){
+  if(el('pw').value===HQ_PW){renderHQApp();}
+  else{el('login-err').style.display='block';}
+}
+
+// ══════════════════════════════
+//  代表者：レポート画面
+// ══════════════════════════════
+function renderHQApp(){
+  el('app').innerHTML=`
+  <div class="topbar">
+    <button class="btn-icon" onclick="renderHQLogin()"><i class="ti ti-logout" style="font-size:20px"></i></button>
+    <div>
+      <div class="topbar-title">株式会社Kany's レポート</div>
+      <div class="topbar-sub">全店舗の送信データ</div>
+    </div>
+    <button class="btn-icon" onclick="initHQApp()"><i class="ti ti-refresh" style="font-size:20px"></i></button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="ht-report" onclick="swHTab('report')"><i class="ti ti-chart-bar"></i> 店舗別レポート</button>
+    <button class="tab" id="ht-annual" onclick="swHTab('annual')"><i class="ti ti-chart-line"></i> 年次レポート</button>
+    <button class="tab" id="ht-hqinput" onclick="swHTab('hqinput')"><i class="ti ti-edit"></i> 代表者入力</button>
+    <button class="tab" id="ht-payment" onclick="swHTab('payment')"><i class="ti ti-calendar-due"></i> 支払い予定</button>
+    <button class="tab" id="ht-status" onclick="swHTab('status')"><i class="ti ti-checkbox"></i> 提出状況 <span id="unsub-badge"></span></button>
+    <button class="tab" id="ht-detail" onclick="swHTab('detail')"><i class="ti ti-list-details"></i> 明細確認</button>
+    <button class="tab" id="ht-stores" onclick="swHTab('stores')"><i class="ti ti-settings"></i> 店舗設定</button>
+  </div>
+
+  <!-- 年次レポート -->
+  <div id="hq-annual" style="padding:16px;display:none">
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <select id="ann-store" onchange="onAnnStoreChange()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)"></select>
+      <select id="ann-year" onchange="refreshAnnual()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)"></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button id="ann-mode-annual" class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="setAnnMode('annual')"><i class="ti ti-chart-line"></i> 年次</button>
+      <button id="ann-mode-monthly" class="btn btn-sm" style="flex:1;justify-content:center" onclick="setAnnMode('monthly')"><i class="ti ti-calendar"></i> 月次</button>
+    </div>
+    <div id="annual-wrap"></div>
+  </div>
+
+  <!-- 代表者入力 -->
+  <div id="hq-hqinput" style="padding:16px;display:none">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px">店舗を選んで固定費・人件費を入力してください（スタッフには見えません）</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="hqi-store" onchange="loadHQInput()" style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)"></select>
+      <input type="month" id="hqi-month" value="${ym()}" onchange="loadHQInput()" style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div id="hqi-form"></div>
+    <div id="hqi-save-msg" style="font-size:12px;color:var(--green);margin-top:8px;display:none"></div>
+  </div>
+
+  <!-- 店舗別レポート -->
+  <div id="hq-report" style="padding:16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <label style="font-size:13px;color:var(--text2);white-space:nowrap">月を選択</label>
+      <input type="month" id="d-month" value="${ym()}" onchange="refreshReport()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div id="report-cards"><div style="text-align:center;padding:24px;color:var(--text2)">読み込み中...</div></div>
+  </div>
+
+  <!-- 支払い予定 -->
+  <div id="hq-payment" style="padding:16px;display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <label style="font-size:13px;color:var(--text2);white-space:nowrap">支払い月</label>
+      <input type="month" id="pay-month" value="${ym()}" onchange="refreshPayment()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><div>この月に支払いが発生する仕入れ（2ヶ月前の仕入れ）を表示しています</div></div>
+    <div id="payment-cards"></div>
+  </div>
+
+  <!-- 提出状況 -->
+  <div id="hq-status" style="padding:16px;display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <label style="font-size:13px;color:var(--text2);white-space:nowrap">確認月</label>
+      <input type="month" id="status-month" value="${ym()}" onchange="refreshStatus()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div id="status-cards"></div>
+  </div>
+
+  <!-- 明細確認 -->
+  <div id="hq-detail" style="padding:16px;display:none">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <select id="det-store" onchange="refreshDetail()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)"></select>
+      <input type="month" id="det-month" value="${ym()}" onchange="refreshDetail()"
+        style="flex:1;padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface)">
+    </div>
+    <div id="detail-wrap"></div>
+  </div>
+
+  <!-- 店舗設定 -->
+  <div id="hq-stores" style="padding:16px;display:none">
+    <div class="card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px">店舗の追加・名前変更</div>
+      <div id="store-list-ui"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:.5px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:12px">新しい店舗を追加</div>
+        <div class="field"><label>店舗名</label><input type="text" id="new-store-name" placeholder="例：国際通り店"></div>
+        <div class="field"><label>担当者名</label><input type="text" id="new-store-mgr" placeholder="例：山田 太郎"></div>
+        <button class="btn btn-primary btn-block" onclick="addStore()"><i class="ti ti-plus"></i> 店舗を追加</button>
+      </div>
+    </div>
+    <div class="info-box"><i class="ti ti-info-circle"></i><div>店舗名・担当者名を変更して「保存」を押すと反映されます。過去データは保持されます。</div></div>
+  </div>`;
+
+  initHQApp();
+}
+
+function swHTab(tab){
+  ['report','annual','hqinput','payment','status','detail','stores'].forEach(t=>{
+    el('ht-'+t)?.classList.toggle('active',t===tab);
+    const p=el('hq-'+t);if(p)p.style.display=t===tab?'block':'none';
+  });
+  if(tab==='detail'){populateDetailStoreSelect();refreshDetail();}
+  if(tab==='stores')renderStoreListUI();
+  if(tab==='payment')refreshPayment();
+  if(tab==='hqinput'){populateHQIStoreSelect();loadHQInput();}
+  if(tab==='annual'){populateAnnualSelects();refreshAnnual();}
+}
+
+function initHQApp(){refreshReport();refreshStatus();populateDetailStoreSelect();refreshDetail();populateHQIStoreSelect();}
+
+// ── 代表者入力 ──
+let hqFormData={};
+
+function populateHQIStoreSelect(){
+  const stores=getStores(),sel=el('hqi-store');if(!sel)return;
+  sel.innerHTML=stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function loadHQInput(){
+  const sid=el('hqi-store')?.value,mo=el('hqi-month')?.value;
+  if(!sid||!mo)return;
+  const secs=getHQSections(sid);
+  const cats=getHQCats(sid);
+  if(!secs.length){
+    el('hqi-form').innerHTML='<div class="card" style="text-align:center;padding:20px;color:var(--text2)">この店舗の代表者入力項目は金曜日に設定予定です</div>';
+    return;
+  }
+  const recKey='hq_'+sid+'_'+mo;
+  const saved=lsGet(recKey)||{};
+  hqFormData={};
+  const DEFAULTS={rent_daito:78170,rent_meiko:80110,kakehashi:47278,ricoh:117480,docomo:4433,ryugin:2200,orico:133320,ryuanzen:12100,daiichi:24669,nisseiCar:6450,nisseiYama:18377,nisseiLife:12460,nhk:1930};
+  secs.forEach(s=>{
+    if(s.single){
+      const v=saved[s.key];
+      hqFormData[s.key]=(v!=null&&v!=='')?v:(DEFAULTS[s.key]??'');
+    }else{
+      hqFormData[s.key]=(saved[s.key]&&saved[s.key].length)?saved[s.key].map(i=>({...i})):[{id:uid(),name:'',amount:''}];
+    }
+  });
+  renderHQIForm(secs,cats,mo);
+}
+
+function renderHQIForm(secs,cats,mo){
+  const wrap=el('hqi-form');if(!wrap)return;
+  wrap.innerHTML='';
+  const moNum=parseInt(mo.split('-')[1]||'0');
+  cats.forEach(cat=>{
+    const isPub=cat.public;
+    const div=document.createElement('div');
+    div.style.cssText=isPub?'border:1.5px solid #7b1fa2;background:#fdf4ff;margin-bottom:12px;border-radius:var(--r);padding:16px;':'';
+    if(!isPub)div.className='card';
+    div.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:${isPub?'#7b1fa2':'var(--text2)'};display:flex;align-items:center;gap:6px">
+        ${isPub?'<i class="ti ti-alert-triangle" style="color:#7b1fa2"></i>':'<i class="ti '+cat.icon+'"></i>'}${cat.label}
+      </div>
+    </div>
+    ${isPub?'<div style="font-size:11px;color:#7b1fa2;margin-bottom:10px">市・国・県への支払い — 重要</div>':''}
+    <div id="hqi-cat-${cat.keys[0]}"></div>`;
+    wrap.appendChild(div);
+    const inner=el('hqi-cat-'+cat.keys[0]);
+    cat.keys.forEach(key=>{
+      const sec=secs.find(s=>s.key===key);if(!sec)return;
+      if(sec.bonusOnly&&![3,8,12].includes(moNum))return;
+      if(sec.single){
+        const row=document.createElement('div');
+        row.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:.5px solid var(--border)">
+          <div style="font-size:13px;font-weight:600;color:${sec.color};display:flex;align-items:center;gap:6px"><i class="ti ${sec.icon}"></i>${sec.label}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="hqif-${key}" value="${hqFormData[key]||''}" placeholder="0" min="0" inputmode="numeric"
+              style="width:120px;text-align:right;padding:7px 10px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);font-size:14px;color:${sec.color}"
+              oninput="hqFormData['${key}']=parseFloat(this.value)||0">
+            <span style="font-size:12px;color:var(--text2)">円</span>
+          </div>
+        </div>`;
+        inner.appendChild(row);
+      }else{
+        const blk=document.createElement('div');
+        blk.className='sec-block';blk.id='hqiblk-'+key;
+        blk.innerHTML=`<div class="sec-head"><div class="sec-head-left" style="color:${sec.color}"><i class="ti ${sec.icon}"></i>${sec.label}</div></div>
+          <div id="hqirows-${key}"></div>
+          <button class="btn-add-row" onclick="addHQIRow('${key}')"><i class="ti ti-plus"></i> 明細を追加</button>`;
+        inner.appendChild(blk);
+        const rowWrap=el('hqirows-'+key);
+        (hqFormData[key]||[]).forEach(item=>{
+          const row=document.createElement('div');
+          row.className='detail-row';row.id='hqidr-'+item.id;
+          row.innerHTML=`<div class="dr-name"><input type="text" placeholder="${sec.ph||'名称'}" value="${item.name||''}" oninput="updateHQIItem('${key}','${item.id}','name',this.value)"></div>
+            <div class="dr-amt"><input type="number" placeholder="0" value="${item.amount||''}" min="0" inputmode="numeric" style="color:${sec.color}" oninput="updateHQIItem('${key}','${item.id}','amount',parseFloat(this.value)||0)"><span class="dr-unit">円</span></div>
+            <button class="btn-del" onclick="removeHQIRow('${key}','${item.id}')"><i class="ti ti-x"></i></button>`;
+          rowWrap.appendChild(row);
+        });
+      }
+    });
+  });
+  const btnWrap=document.createElement('div');
+  btnWrap.innerHTML=`<button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveHQInput()"><i class="ti ti-device-floppy"></i> 代表者入力を保存</button>`;
+  wrap.appendChild(btnWrap);
+}
+
+function addHQIRow(key){
+  const item={id:uid(),name:'',amount:''};
+  (hqFormData[key]=hqFormData[key]||[]).push(item);
+  const wrap=el('hqirows-'+key);if(!wrap)return;
+  const secs=getHQSections(el('hqi-store')?.value||'s1');
+  const sec=secs.find(s=>s.key===key);
+  const row=document.createElement('div');
+  row.className='detail-row';row.id='hqidr-'+item.id;
+  row.innerHTML=`<div class="dr-name"><input type="text" placeholder="${sec?.ph||'名称'}" value="" oninput="updateHQIItem('${key}','${item.id}','name',this.value)"></div>
+    <div class="dr-amt"><input type="number" placeholder="0" value="" min="0" inputmode="numeric" style="color:${sec?.color||'#b03020'}" oninput="updateHQIItem('${key}','${item.id}','amount',parseFloat(this.value)||0)"><span class="dr-unit">円</span></div>
+    <button class="btn-del" onclick="removeHQIRow('${key}','${item.id}')"><i class="ti ti-x"></i></button>`;
+  wrap.appendChild(row);
+  row.querySelector('input[type=text]')?.focus();
+}
+
+function updateHQIItem(key,id,field,val){
+  const item=(hqFormData[key]||[]).find(i=>i.id===id);
+  if(item)item[field]=val;
+}
+
+function removeHQIRow(key,id){
+  if((hqFormData[key]||[]).length<=1){
+    const it=hqFormData[key]?.find(i=>i.id===id);
+    if(it){it.name='';it.amount='';}
+    el('hqidr-'+id)?.querySelectorAll('input').forEach(e=>e.value='');
+    return;
+  }
+  hqFormData[key]=hqFormData[key].filter(i=>i.id!==id);
+  el('hqidr-'+id)?.remove();
+}
+
+function saveHQInput(){
+  const sid=el('hqi-store')?.value,mo=el('hqi-month')?.value;
+  if(!sid||!mo)return;
+  const secs=getHQSections(sid);
+  const data={storeId:sid,month:mo,savedAt:new Date().toISOString()};
+  secs.forEach(s=>{
+    if(s.single)data[s.key]=parseFloat(hqFormData[s.key])||0;
+    else data[s.key]=(hqFormData[s.key]||[]).filter(i=>i.name||i.amount).map(i=>({...i}));
+  });
+  lsSet('hq_'+sid+'_'+mo,data);
+  const msg=el('hqi-save-msg');
+  if(msg){msg.textContent='保存しました！';msg.style.display='block';setTimeout(()=>msg.style.display='none',2500);}
+  toast('代表者入力を保存しました！');
+}
+
+
+function refreshReport(){
+  const mo=el('d-month')?.value||ym();
+  const stores=getStores();
+  const allRecs=loadAllForMonth(mo);
+  const wrap=el('report-cards');if(!wrap)return;
+
+  const sentCount=allRecs.filter(r=>r.sentToHQ).length;
+  let html=`<div style="font-size:12px;color:var(--text2);margin-bottom:14px">${sentCount}/${stores.length} 店舗が送信済み（${mo}）</div>`;
+
+  stores.forEach(s=>{
+    const r=allRecs.find(x=>x.storeId===s.id);
+
+    // 未提出
+    if(!r||!r.sentToHQ){
+      html+=`<div class="hq-store-card" style="border-left:4px solid var(--border2)">
+        <div class="hq-store-card-header">
+          <div>
+            <div style="font-size:17px;font-weight:800">${s.name}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">${s.manager||''}</div>
+          </div>
+          <span class="badge bg-gray">${r?'下書き':'未提出'}</span>
+        </div>
+      </div>`;
+      return;
+    }
+
+    const inc=incomeOf(r),cos=costsOf(r),pro=inc-cos;
+    const fix=fixedOf(r),vr=varOf(r);
+    const hqRec=lsGet('hq_'+s.id+'_'+mo)||{};
+    const laborYama=parseFloat(hqRec.labor_yamasiro)||0;
+    const laborMura=parseFloat(hqRec.labor_murakami)||0;
+    const laborBonus=parseFloat(hqRec.labor_bonus)||0;
+    const laborTotal=laborYama+laborMura+laborBonus+sumItems(hqRec.labor);
+    const pub=publicOf(r);
+    const misc=miscOf(r);
+    const totalCost=fix+misc+pub+vr+laborTotal;
+    const netProfit=inc-totalCost;
+    const mg=inc>0?(netProfit/inc*100):null;
+    const borderColor=netProfit>=0?'var(--green)':'var(--red)';
+
+    html+=`<div class="hq-store-card" style="border-left:4px solid ${borderColor}">
+      <div class="hq-store-card-header">
+        <div>
+          <div style="font-size:17px;font-weight:800">${s.name}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">${s.manager||''} · ${new Date(r.sentAt).toLocaleDateString('ja-JP')}送信</div>
+        </div>
+        <span class="badge ${netProfit>=0?'bg-green':'bg-red'}">${netProfit>=0?'黒字':'赤字'}</span>
+      </div>
+      <div class="hq-store-card-body">
+        <div class="kpi-grid">
+          <div class="kpi" style="background:var(--blue-bg)">
+            <div class="kpi-label" style="color:var(--blue)">収入合計</div>
+            <div class="kpi-val" style="color:var(--blue)">${fmt(inc)}</div>
+          </div>
+          <div class="kpi" style="background:${netProfit>=0?'var(--green-bg)':'var(--red-bg)'}">
+            <div class="kpi-label" style="color:${netProfit>=0?'var(--green)':'var(--red)'}">営業利益</div>
+            <div class="kpi-val" style="color:${netProfit>=0?'var(--green)':'var(--red)'}">${fmt(netProfit)}</div>
+            <div style="font-size:10px;color:${netProfit>=0?'var(--green)':'var(--red)'};margin-top:3px;opacity:.8">利益率 ${mg!==null?mg.toFixed(1)+'%':'—'}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;border:.5px solid var(--border);border-radius:var(--rsm);overflow:hidden">
+          <div style="background:var(--surface2);padding:8px 12px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.05em">支払い内訳</div>
+          ${laborTotal>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:.5px solid var(--border);font-size:13px">
+            <span style="color:var(--text2)">人件費・役員報酬</span><span style="font-weight:700;color:var(--red)">${fmt(laborTotal)}</span>
+          </div>`:''}
+          ${fix>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:.5px solid var(--border);font-size:13px">
+            <span style="color:var(--text2)">固定費</span><span style="font-weight:700;color:var(--red)">${fmt(fix)}</span>
+          </div>`:''}
+          ${misc>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:.5px solid var(--border);font-size:13px">
+            <span style="color:var(--text2)">諸経費</span><span style="font-weight:700;color:#5a4200">${fmt(misc)}</span>
+          </div>`:''}
+          ${pub>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:.5px solid var(--border);font-size:13px">
+            <span style="color:#7b1fa2;font-weight:600">公的支払い</span><span style="font-weight:700;color:#7b1fa2">${fmt(pub)}</span>
+          </div>`:''}
+          ${vr>0?`<div style="display:flex;justify-content:space-between;padding:8px 12px;border-top:.5px solid var(--border);font-size:13px">
+            <span style="color:var(--text2)">変動費・買取</span><span style="font-weight:700;color:var(--amber)">${fmt(vr)}</span>
+          </div>`:''}
+          <div style="display:flex;justify-content:space-between;padding:9px 12px;border-top:1.5px solid var(--text);font-size:13px;font-weight:700">
+            <span>支払い合計</span><span style="color:var(--red)">${fmt(totalCost)}</span>
+          </div>
+        </div>
+        ${r.memo?`<div style="margin-top:10px;padding:9px 12px;background:var(--surface2);border-radius:var(--rsm);font-size:12px;color:var(--text2)"><i class="ti ti-note"></i> ${r.memo}</div>`:''}
+        <button class="btn btn-sm" style="width:100%;justify-content:center;margin-top:10px" onclick="swHTab('detail');setTimeout(()=>{const s=el('det-store');if(s){s.value='${s.id}';refreshDetail();}},50)">
+          <i class="ti ti-list-details"></i> 明細を確認する
+        </button>
+      </div>
+    </div>`;
+  });
+
+  wrap.innerHTML=html;
+}
+
+// ── 支払い予定 ──
+function refreshPayment(){
+  const payMo=el('pay-month')?.value||ym();
+  const wrap=el('payment-cards');if(!wrap)return;
+
+  // 仕入れは本店（s1）のみ
+  const purMo1=addMonths(payMo,-1);
+  const purMo2=addMonths(payMo,-2);
+
+  const rec1=loadPurchaseRec('s1',purMo1);
+  const rec2=loadPurchaseRec('s1',purMo2);
+
+  const sup1List=SUPPLIERS.filter(s=>s.payOffset===1);
+  const sup2List=SUPPLIERS.filter(s=>s.payOffset===2);
+
+  const total1=sup1List.reduce((t,sup)=>t+(rec1?.suppliers?.[sup.id]||0),0);
+  const total2=sup2List.reduce((t,sup)=>t+(rec2?.suppliers?.[sup.id]||0),0);
+  const grandTotal=total1+total2;
+
+  let html=`
+  <div class="card" style="margin-bottom:14px;border-left:4px solid var(--red);border-radius:0 var(--r) var(--r) 0">
+    <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">${payMo} の支払い合計</div>
+    <div style="font-size:30px;font-weight:800;color:var(--red);margin-bottom:16px">${fmt(grandTotal)}</div>
+    <div style="padding:10px 0;border-top:.5px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">翌月払い（${purMo1}仕入れ分）</div>
+      ${sup1List.map(s=>{
+        const amt=rec1?.suppliers?.[s.id]||0;
+        return`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px">
+          <span style="color:var(--text2)">${s.name}</span>
+          <span style="font-weight:600;color:${amt>0?'var(--red)':'var(--text2)'}">${fmt(amt)}</span>
+        </div>`;
+      }).join('')}
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:.5px solid var(--border);margin-top:4px;font-weight:700">
+        <span>小計</span><span style="color:var(--red)">${fmt(total1)}</span>
+      </div>
+    </div>
+    <div style="padding:10px 0;border-top:.5px solid var(--border)">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">翌々月払い（${purMo2}仕入れ分）</div>
+      ${sup2List.map(s=>{
+        const amt=rec2?.suppliers?.[s.id]||0;
+        return`<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px">
+          <span style="color:var(--text2)">${s.name}</span>
+          <span style="font-weight:600;color:${amt>0?'var(--red)':'var(--text2)'}">${fmt(amt)}</span>
+        </div>`;
+      }).join('')}
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:.5px solid var(--border);margin-top:4px;font-weight:700">
+        <span>小計</span><span style="color:var(--red)">${fmt(total2)}</span>
+      </div>
+    </div>
+  </div>`;
+
+  wrap.innerHTML=html;
+}
+
+
+// ── 年次レポート ──
+let annMode='annual'; // 'annual' or 'monthly'
+
+function setAnnMode(mode){
+  annMode=mode;
+  el('ann-mode-annual')?.classList.toggle('btn-primary',mode==='annual');
+  el('ann-mode-annual')?.classList.toggle('btn',true);
+  el('ann-mode-monthly')?.classList.toggle('btn-primary',mode==='monthly');
+  el('ann-mode-monthly')?.classList.toggle('btn',true);
+  refreshAnnual();
+}
+
+function onAnnStoreChange(){
+  populateAnnualYears();
+  refreshAnnual();
+}
+
+function populateAnnualSelects(){
+  const stores=getStores();
+  const sel=el('ann-store');
+  if(sel&&!sel.innerHTML){
+    sel.innerHTML=stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  }
+  populateAnnualYears();
+}
+
+function populateAnnualYears(){
+  const sid=el('ann-store')?.value||'s1';
+  const ySel=el('ann-year');if(!ySel)return;
+  const cur=new Date().getFullYear();
+  let opts='';
+  for(let y=cur;y>=cur-3;y--){
+    opts+=`<option value="${y}">${getFiscalYearLabel(y,sid)}</option>`;
+  }
+  ySel.innerHTML=opts;
+}
+
+function getFiscalStart(sid){
+  if(sid==='s1')return 9; // 薬局：9月始まり
+  if(sid==='s2')return 3; // リサイクル：3月始まり
+  return 1; // コインランドリー：1月始まり
+}
+
+function getAnnualMonths(year,sid){
+  const start=getFiscalStart(sid);
+  const months=[];
+  for(let i=0;i<12;i++){
+    const m=((start-1+i)%12)+1;
+    const y=start+i>12?year+1:year;
+    months.push(`${y}-${String(m).padStart(2,'0')}`);
+  }
+  return months;
+}
+
+function getFiscalYearLabel(year,sid){
+  const start=getFiscalStart(sid);
+  if(start===1) return`${year}年度（${year}/1〜${year}/12）`;
+  if(start===3) return`${year}年度（${year}/3〜${year+1}/2）`;
+  if(start===9) return`${year}年度（${year}/9〜${year+1}/8）`;
+  return`${year}年度`;
+}
+
+function refreshAnnual(){
+  const sid=el('ann-store')?.value;
+  const year=parseInt(el('ann-year')?.value||new Date().getFullYear());
+  const wrap=el('annual-wrap');
+  if(!wrap||!sid)return;
+
+  const months=getAnnualMonths(year,sid);
+  const store=getStores().find(s=>s.id===sid);
+
+  let totalIncome=0,totalFixed=0,totalMisc=0,totalVar=0,totalPub=0,totalKaitori=0,totalLabor=0;
+  const monthlyData=[];
+
+  months.forEach(mo=>{
+    const r=loadRec(sid,mo);
+    const hqR=lsGet('hq_'+sid+'_'+mo)||{};
+    const inc=r?incomeOf(r):0;
+    const fix=r?fixedOf(r):0;
+    const mis=r?miscOf(r):0;
+    const vr=r?varOf(r):0;
+    const pub=r?publicOf(r):0;
+    const kai=r?(sumItems(r.kaitori)||0):0;
+    const labor=(parseFloat(hqR.labor_yamasiro)||0)+(parseFloat(hqR.labor_murakami)||0)+(parseFloat(hqR.labor_bonus)||0)+sumItems(hqR.labor);
+    const lawTax=(parseFloat(r?.tax_hojin)||parseFloat(r?.k_tax_hojin)||parseFloat(r?.m_tax_hojin)||0);
+    const kRepay=(parseFloat(r?.kouko_repay)||parseFloat(r?.k_kouko_repay)||parseFloat(r?.m_kouko_repay)||0);
+
+    totalIncome+=inc; totalFixed+=fix; totalMisc+=mis;
+    totalVar+=vr; totalPub+=pub; totalKaitori+=kai; totalLabor+=labor;
+
+    monthlyData.push({mo,inc,fix,mis,vr,pub,kai,labor,lawTax,kRepay,sent:r?.sentToHQ});
+  });
+
+  const grossProfit=totalIncome-totalKaitori;
+  const operatingProfit=totalIncome-totalFixed-totalMisc-totalLabor-totalVar;
+  const totalKouko=monthlyData.reduce((s,d)=>s+d.kRepay,0);
+  const ordinaryProfit=operatingProfit-totalKouko;
+  const lawTaxTotal=monthlyData.reduce((s,d)=>s+d.lawTax,0);
+  const netProfit=ordinaryProfit-lawTaxTotal;
+  const sentCount=monthlyData.filter(d=>d.sent).length;
+
+  const row=(label,val,bold,color,indent,topBorder)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;
+      padding:${topBorder?'12px':'8px'} 0 8px ${indent?'16px':'0'};
+      border-top:${topBorder?'1.5px solid var(--text)':'.5px solid var(--border)'}">
+      <span style="font-size:${bold?'14px':'13px'};font-weight:${bold?'700':'400'};color:${color||'var(--text2)'}">${label}</span>
+      <span style="font-size:${bold?'16px':'14px'};font-weight:${bold?'800':'600'};color:${color||(val>=0?'var(--text)':'var(--red)')}">${fmt(val)}</span>
+    </div>`;
+
+  wrap.innerHTML=`
+  <div class="card" style="margin-bottom:14px;border-left:4px solid ${netProfit>=0?'var(--green)':'var(--red)'}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-size:16px;font-weight:800">${store?.name} ${year}年度</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${year}/4〜${year+1}/3 · ${sentCount}/12ヶ月分</div>
+      </div>
+      <span class="badge ${netProfit>=0?'bg-green':'bg-red'}">${netProfit>=0?'黒字':'赤字'}</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi" style="background:var(--blue-bg)">
+        <div class="kpi-label" style="color:var(--blue)">年間売上高</div>
+        <div class="kpi-val" style="color:var(--blue);font-size:17px">${fmt(totalIncome)}</div>
+      </div>
+      <div class="kpi" style="background:${netProfit>=0?'var(--green-bg)':'var(--red-bg)'}">
+        <div class="kpi-label" style="color:${netProfit>=0?'var(--green)':'var(--red)'}">税引後利益</div>
+        <div class="kpi-val" style="color:${netProfit>=0?'var(--green)':'var(--red)'};font-size:17px">${fmt(netProfit)}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:4px">損益計算書（P/L）</div>
+    ${row('売上高',totalIncome,true,'var(--blue)',false,false)}
+    ${totalKaitori>0?row('仕入原価',-totalKaitori,false,'var(--red)',true,false):''}
+    ${totalKaitori>0?row('売上総利益（粗利）',grossProfit,true,grossProfit>=0?'var(--green)':'var(--red)',false,true):''}
+    ${row('販売費・人件費・諸経費',-(totalFixed+totalLabor+totalMisc+totalVar-totalKaitori),false,'var(--red)',true,false)}
+    ${row('営業利益',operatingProfit,true,operatingProfit>=0?'var(--green)':'var(--red)',false,true)}
+    ${totalKouko>0?row('営業外費用（公庫返済）',-totalKouko,false,'var(--red)',true,false):''}
+    ${row('経常利益',ordinaryProfit,true,ordinaryProfit>=0?'var(--green)':'var(--red)',false,true)}
+    ${lawTaxTotal>0?row('法人税',-lawTaxTotal,false,'#7b1fa2',true,false):''}
+    ${row('当期純利益（税引後）',netProfit,true,netProfit>=0?'var(--green)':'var(--red)',false,true)}
+  </div>
+
+  <div class="card">
+    <div style="font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.05em;margin-bottom:4px">月別推移</div>
+    ${monthlyData.map(d=>{
+      const profit=d.inc-d.fix-d.mis-d.vr-d.labor;
+      return`<div style="padding:8px 0;border-top:.5px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:600">${d.mo.replace('-','年')}月</span>
+          <span class="badge ${d.sent?'bg-green':'bg-gray'}" style="font-size:10px">${d.sent?'送信済':'未送信'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;color:var(--text2)">
+          <span>収入<br><strong style="font-size:13px;color:var(--blue)">${fmt(d.inc)}</strong></span>
+          <span>費用<br><strong style="font-size:13px;color:var(--red)">${fmt(d.fix+d.mis+d.vr+d.labor)}</strong></span>
+          <span>利益<br><strong style="font-size:13px;color:${profit>=0?'var(--green)':'var(--red)'}">${fmt(profit)}</strong></span>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  // 月次モードの場合は月ごとにP/Lを表示
+  if(annMode==='monthly'){
+    wrap.innerHTML=`
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${getFiscalYearLabel(year,sid)}</div>
+    ${monthlyData.map(d=>{
+      const operProfit=d.inc-d.fix-d.mis-d.vr-d.labor;
+      const netP=operProfit-d.kRepay-d.lawTax;
+      return`<div class="card" style="margin-bottom:10px;border-left:3px solid ${netP>=0?'var(--green)':'var(--red)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:15px;font-weight:700">${d.mo.replace('-','年')}月</div>
+          <span class="badge ${d.sent?'bg-green':'bg-gray'}">${d.sent?'送信済':'未送信'}</span>
+        </div>
+        ${row('売上高',d.inc,false,'var(--blue)',false,false)}
+        ${d.kai>0?row('仕入原価',-d.kai,false,'var(--red)',true,false):''}
+        ${row('営業利益',operProfit,true,operProfit>=0?'var(--green)':'var(--red)',false,true)}
+        ${d.kRepay>0?row('営業外費用（公庫返済）',-d.kRepay,false,'var(--red)',true,false):''}
+        ${d.lawTax>0?row('法人税',-d.lawTax,false,'#7b1fa2',true,false):''}
+        ${row('当期純利益',netP,true,netP>=0?'var(--green)':'var(--red)',false,true)}
+      </div>`;
+    }).join('')}`;
+  }
+}
+
+function refreshStatus(){
+  const mo=el('status-month')?.value||ym();
+  const stores=getStores(),recs=loadAllForMonth(mo);
+  let unsub=0;
+  const wrap=el('status-cards');if(!wrap)return;
+  wrap.innerHTML=stores.map(s=>{
+    const r=recs.find(x=>x.storeId===s.id);
+    const emp=(r?.labor||[]).filter(i=>i.name).length;
+    let dot,label,dc='—';
+    if(!r){unsub++;dot='dot-gray';label='未入力';}
+    else if(!r.sentToHQ){unsub++;dot='dot-r';label='下書き（未送信）';dc=new Date(r.updatedAt).toLocaleString('ja-JP');}
+    else{dot='dot-g';label='送信済';dc=new Date(r.sentAt).toLocaleString('ja-JP');}
+    return`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:16px;font-weight:700">${s.name}</div>
+        ${emp>0?`<span class="badge bg-purple" style="background:var(--purple-bg);color:var(--purple)">${emp}名</span>`:''}
+      </div>
+      <div style="font-size:13px;margin-bottom:3px"><span class="dot ${dot}"></span>${label}</div>
+      <div style="font-size:12px;color:var(--text2)">${s.manager||''} ${dc!=='—'?'· '+dc:''}</div>
+    </div>`;
+  }).join('');
+  const b=el('unsub-badge');
+  if(b)b.innerHTML=unsub>0?`<span class="notify-badge">${unsub}</span>`:'';
+}
+
+// ── 明細確認 ──
+function populateDetailStoreSelect(){
+  const stores=getStores(),sel=el('det-store');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML=stores.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+function refreshDetail(){
+  const sid=el('det-store')?.value,mo=el('det-month')?.value||ym();
+  const wrap=el('detail-wrap');if(!wrap||!sid)return;
+  const rec=loadRec(sid,mo);
+  if(!rec){wrap.innerHTML='<div class="card" style="text-align:center;padding:20px;color:var(--text2)">この月のデータはまだ送信されていません</div>';return;}
+  const store=getStores().find(s=>s.id===sid);
+  const inc=incomeOf(rec),cos=costsOf(rec),pro=inc-cos;
+
+  const renderBlock=(sec,items)=>{
+    const filled=(items||[]).filter(i=>i.name||i.amount);
+    if(!filled.length)return'';
+    const tot=sumItems(filled);
+    return`<div class="detail-sec">
+      <div class="detail-sec-head" style="background:${sec.cat==='income'?'var(--blue-bg)':sec.cat==='fixed'?'var(--red-bg)':'var(--amber-bg)'}">
+        <div class="detail-sec-head-label" style="color:${sec.color}"><i class="ti ${sec.icon}" style="font-size:13px"></i>${sec.label}</div>
+        <div style="font-size:13px;font-weight:700;color:${sec.color}">${fmt(tot)}</div>
+      </div>
+      ${filled.map(i=>`<div class="detail-item">
+        <div style="color:var(--text2)">${i.name||'（名称未設定）'}</div>
+        <div style="font-weight:600;color:${sec.color}">${fmt(i.amount)}</div>
+      </div>`).join('')}
+    </div>`;
+  };
+
+  wrap.innerHTML=`<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:16px;font-weight:800">${store?.name||'—'}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${rec.month} · ${rec.sentToHQ?'送信済':'下書き'}</div>
+      </div>
+      <span class="badge ${rec.sentToHQ?'bg-green':'bg-gray'}">${rec.sentToHQ?'送信済':'下書き'}</span>
+    </div>
+    ${SECTIONS.map(s=>renderBlock(s,rec[s.key])).join('')}
+    <div class="sum-row"><span style="color:var(--text2)">収入合計</span><span style="font-weight:700">${fmt(inc)}</span></div>
+    <div class="sum-row"><span style="color:var(--text2)">費用合計</span><span style="color:var(--red);font-weight:700">${fmt(cos)}</span></div>
+    <div class="sum-row total">
+      <span style="font-weight:800;font-size:15px">営業利益</span>
+      <span style="font-size:22px;font-weight:800;color:${pro>=0?'var(--green)':'var(--red)'}">${fmt(pro)}</span>
+    </div>
+    ${rec.memo?`<div style="margin-top:12px;padding:10px 13px;background:var(--surface2);border-radius:var(--rsm);font-size:13px;color:var(--text2)"><i class="ti ti-note"></i> ${rec.memo}</div>`:''}
+  </div>`;
+}
+
+// ── 店舗設定 ──
+function renderStoreListUI(){
+  const stores=getStores(),wrap=el('store-list-ui');if(!wrap)return;
+  wrap.innerHTML=stores.map(s=>`<div class="store-edit-row">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">店舗名</div>
+    <input type="text" id="sname-${s.id}" value="${s.name}" style="padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);width:100%;font-size:15px;font-weight:700;margin-bottom:8px">
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px">担当者名</div>
+    <input type="text" id="smgr-${s.id}" value="${s.manager||''}" placeholder="担当者名" style="padding:9px 12px;border:.5px solid var(--border2);border-radius:var(--rsm);background:var(--surface);width:100%;font-size:14px;margin-bottom:10px">
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1" onclick="updateStore('${s.id}')"><i class="ti ti-check"></i> 保存</button>
+      <button class="btn" style="color:var(--red)" onclick="deleteStore('${s.id}')"><i class="ti ti-trash"></i></button>
+    </div>
+  </div>`).join('');
+}
+
+function updateStore(id){
+  const stores=getStores(),s=stores.find(x=>x.id===id);if(!s)return;
+  const n=el('sname-'+id)?.value.trim(),m=el('smgr-'+id)?.value.trim();
+  if(n)s.name=n;if(m!==undefined)s.manager=m;
+  saveStores(stores);renderStoreListUI();toast('店舗情報を更新しました');
+}
+
+function deleteStore(id){
+  if(!confirm('この店舗を削除しますか？'))return;
+  saveStores(getStores().filter(s=>s.id!==id));
+  renderStoreListUI();
+}
+
+function addStore(){
+  const name=el('new-store-name')?.value.trim(),mgr=el('new-store-mgr')?.value.trim();
+  if(!name){toast('店舗名を入力してください');return;}
+  const stores=getStores();
+  stores.push({id:'s'+Date.now(),name,manager:mgr||''});
+  saveStores(stores);
+  el('new-store-name').value='';el('new-store-mgr').value='';
+  renderStoreListUI();toast('店舗を追加しました');
+}
+
+// ── Start ──
+renderRoleSelect();
+</script>
+</body>
+</html>
